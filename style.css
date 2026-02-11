@@ -18,9 +18,10 @@
   --border: oklch(0.6209 0.1801 348.1385);
   --input: oklch(0.9189 0 0);
   --ring: oklch(0.7002 0.1597 350.7532);
-  --font-pixel: 'VT323', monospace;
-  --radius: 0.4rem;
-  --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
+  /* Use DotGothic16 for Chinese support */
+  --font-pixel: 'DotGothic16', sans-serif;
+  /* Hard shadow color */
+  --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
 /* Global Reset for Pixel Font */
@@ -49,7 +50,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 header {
@@ -57,16 +58,18 @@ header {
 }
 
 header h1 {
-  font-size: 5rem;
+  font-size: 4rem;
   margin: 0;
   color: var(--primary);
+  /* Hard pixel shadow */
   text-shadow: 4px 4px 0px var(--shadow-color);
   letter-spacing: 4px;
+  line-height: 1;
 }
 
 header p {
-  font-size: 1.8rem;
-  margin: 0;
+  font-size: 1.5rem;
+  margin-top: 10px;
   color: var(--muted-foreground);
   text-transform: uppercase;
 }
@@ -74,31 +77,50 @@ header p {
 /* Slot Machine Structure */
 .slot-machine-container {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  align-items: flex-end; /* Align bottom */
+  gap: 10px;
+  /* Center visually */
   transform: translateX(30px);
 }
 
 .machine-body {
   background-color: var(--card);
+  /* Double border effect for pixel look */
   border: 4px solid var(--border);
-  border-radius: 12px;
+  /* No rounded corners! */
+  border-radius: 0; 
   padding: 20px;
+  /* Hard box shadow */
   box-shadow: 8px 8px 0px var(--shadow-color);
-  width: 360px; /* Widened to fit text */
+  width: 360px; 
   position: relative;
 }
 
+/* Decorative screws */
+.machine-body::before, .machine-body::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--muted-foreground);
+  top: 6px;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3);
+}
+.machine-body::before { left: 6px; }
+.machine-body::after { right: 6px; }
+
+
 .screen-border {
   background-color: var(--input);
-  padding: 15px;
+  padding: 10px;
   border: 4px solid var(--secondary-foreground);
-  border-radius: 4px;
+  border-radius: 0;
+  /* Inset hard shadow */
   box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
 }
 
 .spinner-window {
-  height: 240px; /* Increased height for breathing room */
+  height: 240px; 
   background: white;
   overflow: hidden;
   position: relative;
@@ -114,49 +136,54 @@ header p {
 }
 
 .spinner-item {
-  height: 240px; /* Matches window height */
+  height: 240px; 
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  line-height: 1.2;
-  padding: 0 15px; /* More padding */
-  border-bottom: 2px solid var(--muted); /* Stronger divider */
+  line-height: 1.4;
+  padding: 0 15px; 
+  border-bottom: 2px solid var(--muted); 
   box-sizing: border-box;
 }
 
 .drink-title {
-  font-size: 2rem; /* Adjusted size */
+  font-size: 1.8rem; 
   font-weight: bold;
   color: var(--primary);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  line-height: 1.1;
+  margin-bottom: 5px;
+  /* text-transform: uppercase; // Chinese doesn't have case */
 }
 
 .drink-recipe {
-  font-size: 1.4rem; /* Adjusted size */
+  font-size: 1.2rem; 
   color: var(--foreground);
-  margin-bottom: 8px;
-  line-height: 1.3;
+  margin-bottom: 5px;
 }
 
 .drink-desc {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--muted-foreground);
-  font-style: italic;
+  /* font-style: italic; // Pixel fonts often don't support italic well */
   max-width: 90%;
 }
 
+/* Pixel Glare - Stripes */
 .pixel-reflection {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 20%;
-  background: rgba(255,255,255,0.4);
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 2px,
+    transparent 2px,
+    transparent 4px
+  );
   pointer-events: none;
   z-index: 5;
 }
@@ -166,33 +193,36 @@ header p {
   top: 50%;
   left: 0;
   width: 100%;
-  height: 2px; /* Thinner line */
-  background: var(--destructive); /* Red line */
+  height: 4px; 
+  background: var(--destructive); 
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 10;
-  opacity: 0.2; /* Subtler */
-  border-radius: 2px;
+  opacity: 0.4; 
+  /* Dotted line via gradient */
+  background: linear-gradient(90deg, var(--destructive) 50%, transparent 50%);
+  background-size: 8px 100%;
 }
 
 .machine-details {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .detail-stripe {
-  height: 10px;
+  height: 12px;
   width: 40%;
   background-color: var(--secondary);
-  border-radius: 2px;
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
 }
 
-/* Lever Mechanism */
+/* Lever Mechanism - Pixelated */
 .lever-container {
   position: relative;
   width: 60px;
-  height: 280px; /* Scaled for taller machine */
+  height: 280px; 
   cursor: pointer;
 }
 
@@ -200,35 +230,45 @@ header p {
   position: absolute;
   bottom: 20px;
   left: -10px;
-  width: 20px;
-  height: 80px;
+  width: 24px;
+  height: 60px;
   background: var(--muted-foreground);
-  border: 2px solid var(--foreground);
-  border-radius: 4px;
+  border: 4px solid var(--foreground);
+  border-radius: 0; /* Square base */
+  box-shadow: 4px 4px 0 var(--shadow-color);
 }
 
 .lever-stick {
   position: absolute;
   bottom: 50px;
-  left: -2px;
-  width: 8px;
-  height: 180px; /* Taller stick */
+  left: -2px; /* Center relative to base? Base is 24px wide (-10px left). Stick is 8px wide. */
+  /* Base center is roughly left + width/2 = -10 + 12 = 2px. Stick left -2 + 4 = 2px. Close enough. */
+  width: 12px;
+  height: 180px; 
   background: var(--secondary);
-  border: 2px solid var(--foreground);
+  border: 4px solid var(--foreground);
   transform-origin: bottom center;
+  /* Pixel look: no smoothing */
 }
 
+/* The Knob - PIXEL SPHERE (Square) */
 .lever-knob {
   position: absolute;
-  top: -15px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   background: var(--destructive);
-  border-radius: 50%;
-  border: 2px solid var(--foreground);
-  box-shadow: inset -4px -4px 0px rgba(0,0,0,0.2);
+  border-radius: 0; /* SQUARE */
+  border: 4px solid var(--foreground);
+  /* Pixel highlight */
+  box-shadow: inset 4px 4px 0 rgba(255,255,255,0.4), 4px 4px 0 rgba(0,0,0,0.2);
+}
+
+/* Lever Pull Animation - Hard Rotation */
+.lever-container.pulled .lever-stick {
+   transform: rotate(45deg); 
 }
 
 /* Result Box */
@@ -237,8 +277,9 @@ header p {
   color: var(--background);
   padding: 15px 25px;
   border: 4px solid var(--primary);
-  box-shadow: 4px 4px 0px var(--shadow-color);
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Hard shadow */
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  animation: popIn 0.3s steps(4, end); /* Steps animation for choppy pixel feel */
   max-width: 90%;
   text-align: center;
 }
@@ -249,6 +290,7 @@ header p {
   color: var(--accent);
   margin-bottom: 10px;
   letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .result-box.hidden {
@@ -261,10 +303,10 @@ header p {
 }
 
 .winner-pulse {
-  animation: pulse 0.5s ease-in-out infinite alternate;
+  animation: pulse 0.5s steps(2, start) infinite alternate;
 }
 
 @keyframes pulse {
     from { transform: scale(1); }
-    to { transform: scale(1.02); }
+    to { transform: scale(1.05); }
 }
