@@ -1,20 +1,30 @@
 :root {
-  /* Using more vibrant, solid colors for pixel art */
-  --bg-color: #ffe6f2; /* Light pink background */
-  --machine-bg: #fff0f5; /* Off-white machine */
-  --border-color: #2c0404; /* Dark outline */
-  --primary-red: #ff4d4d; /* Bright red */
-  --primary-gold: #ffcc00; /* Gold */
-  --secondary-blue: #4da6ff; /* Blue accent */
-  --text-color: #2c0404;
-  
-  /* Font */
+  --background: oklch(0.9399 0.0203 345.6985);
+  --foreground: oklch(0.4712 0 0);
+  --card: oklch(0.9498 0.0500 86.8891);
+  --card-foreground: oklch(0.4712 0 0);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.4712 0 0);
+  --primary: oklch(0.6209 0.1801 348.1385);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.8095 0.0694 198.1863);
+  --secondary-foreground: oklch(0.3211 0 0);
+  --muted: oklch(0.8800 0.0504 212.0952);
+  --muted-foreground: oklch(0.5795 0 0);
+  --accent: oklch(0.9195 0.0801 87.6670);
+  --accent-foreground: oklch(0.3211 0 0);
+  --destructive: oklch(0.7091 0.1697 21.9551);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0.6209 0.1801 348.1385);
+  --input: oklch(0.9189 0 0);
+  --ring: oklch(0.7002 0.1597 350.7532);
+  /* Use DotGothic16 for Chinese support */
   --font-pixel: 'DotGothic16', sans-serif;
-  
-  /* Pixel Size Unit */
-  --p: 4px; /* Base pixel size */
+  /* Hard shadow color */
+  --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Global Reset for Pixel Font */
 * {
   font-family: var(--font-pixel) !important;
   box-sizing: border-box;
@@ -23,15 +33,17 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--background);
+  color: var(--foreground);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   overflow: hidden;
   image-rendering: pixelated;
+  /* Disable smoothing for sharper pixels */
   -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .main-container {
@@ -41,88 +53,78 @@ body {
   gap: 30px;
 }
 
+header {
+  text-align: center;
+}
+
 header h1 {
   font-size: 4rem;
   margin: 0;
-  color: var(--primary-red);
-  text-transform: uppercase;
-  text-shadow: 4px 4px 0 var(--border-color);
-  letter-spacing: 2px;
+  color: var(--primary);
+  /* Hard pixel shadow */
+  text-shadow: 4px 4px 0px var(--shadow-color);
+  letter-spacing: 4px;
+  line-height: 1;
 }
 
 header p {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   margin-top: 10px;
-  color: var(--text-color);
-  opacity: 0.7;
+  color: var(--muted-foreground);
   text-transform: uppercase;
 }
 
-/* NES-style Pixel Border Mixin (via box-shadow) */
-.pixel-border {
-  position: relative;
-  background: white;
-  border-style: solid;
-  border-width: 4px;
-  border-color: var(--border-color);
-  /* The magic pixel corners via pseudo-elements is cleaner for complex layouts, 
-     but box-shadow is easier for single elements. Let's use box-shadow method. */
-  box-shadow: 
-    -4px 0 0 0 var(--border-color),
-    4px 0 0 0 var(--border-color),
-    0 -4px 0 0 var(--border-color),
-    0 4px 0 0 var(--border-color);
-  margin: 4px; /* Space for the shadow border */
-}
-
-/* Machine Body */
+/* Slot Machine Structure */
 .slot-machine-container {
   display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  padding: 10px;
+  align-items: flex-end; /* Align bottom */
+  gap: 10px;
+  /* Center visually */
+  transform: translateX(30px);
 }
 
 .machine-body {
-  width: 380px;
-  background: var(--machine-bg);
+  background-color: var(--card);
+  /* Double border effect for pixel look */
+  border: 4px solid var(--border);
+  /* No rounded corners! */
+  border-radius: 0; 
   padding: 20px;
+  /* Hard box shadow */
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  width: 360px; 
   position: relative;
-  
-  /* Custom Pixel Border Logic */
-  box-shadow: 
-    -4px 0 0 0 var(--border-color),
-    4px 0 0 0 var(--border-color),
-    0 -4px 0 0 var(--border-color),
-    0 4px 0 0 var(--border-color),
-    8px 8px 0 0 rgba(0,0,0,0.1); /* Drop shadow */
-  margin: 4px;
 }
 
-/* Decorative corner screws */
-.machine-body::after {
+/* Decorative screws */
+.machine-body::before, .machine-body::after {
   content: '';
   position: absolute;
-  top: 8px; right: 8px;
-  width: 8px; height: 8px;
-  background: var(--border-color);
-  box-shadow: 
-    -4px 0 0 0 #aaa,
-    0 4px 0 0 #aaa;
+  width: 8px;
+  height: 8px;
+  background: var(--muted-foreground);
+  top: 6px;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.3);
 }
+.machine-body::before { left: 6px; }
+.machine-body::after { right: 6px; }
+
 
 .screen-border {
-  background: #333; /* Dark bezel */
-  padding: 12px;
-  box-shadow: inset 4px 4px 0 rgba(0,0,0,0.5);
+  background-color: var(--input);
+  padding: 10px;
+  border: 4px solid var(--secondary-foreground);
+  border-radius: 0;
+  /* Inset hard shadow */
+  box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
 }
 
 .spinner-window {
-  height: 240px;
-  background: #fff;
+  height: 240px; 
+  background: white;
   overflow: hidden;
   position: relative;
-  border: 4px solid var(--border-color);
+  border: 2px solid var(--border);
 }
 
 .spinner-list {
@@ -134,48 +136,53 @@ header p {
 }
 
 .spinner-item {
-  height: 240px;
+  height: 240px; 
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 0 15px;
-  border-bottom: 4px dashed #ddd; 
+  line-height: 1.4;
+  padding: 0 15px; 
+  border-bottom: 2px solid var(--muted); 
   box-sizing: border-box;
 }
 
 .drink-title {
-  font-size: 2rem;
-  color: var(--primary-red);
+  font-size: 1.8rem; 
+  font-weight: bold;
+  color: var(--primary);
   margin-bottom: 5px;
-  line-height: 1.1;
+  /* text-transform: uppercase; // Chinese doesn't have case */
 }
 
 .drink-recipe {
-  font-size: 1.4rem;
-  color: var(--text-color);
-  margin-bottom: 8px;
-  line-height: 1.3;
+  font-size: 1.2rem; 
+  color: var(--foreground);
+  margin-bottom: 5px;
 }
 
 .drink-desc {
-  font-size: 1.1rem;
-  color: #666;
+  font-size: 1rem;
+  color: var(--muted-foreground);
+  /* font-style: italic; // Pixel fonts often don't support italic well */
   max-width: 90%;
 }
 
-/* Pixel Reflection Glare */
+/* Pixel Glare - Stripes */
 .pixel-reflection {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: linear-gradient(
-    120deg,
-    rgba(255,255,255,0) 30%,
-    rgba(255,255,255,0.2) 40%,
-    rgba(255,255,255,0) 50%
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 2px,
+    transparent 2px,
+    transparent 4px
   );
   pointer-events: none;
   z-index: 5;
@@ -183,120 +190,123 @@ header p {
 
 .selection-line {
   position: absolute;
-  top: 50%; left: 0;
-  width: 100%; height: 4px;
-  background: rgba(255, 0, 0, 0.2);
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 4px; 
+  background: var(--destructive); 
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 10;
-  border-top: 2px dashed red;
-  border-bottom: 2px dashed red;
-  opacity: 0.5;
+  opacity: 0.4; 
+  /* Dotted line via gradient */
+  background: linear-gradient(90deg, var(--destructive) 50%, transparent 50%);
+  background-size: 8px 100%;
 }
 
-/* Lever */
+.machine-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.detail-stripe {
+  height: 12px;
+  width: 40%;
+  background-color: var(--secondary);
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+
+/* Lever Mechanism - Pixelated */
 .lever-container {
   position: relative;
   width: 60px;
-  height: 300px;
+  height: 280px; 
   cursor: pointer;
 }
 
 .lever-base {
   position: absolute;
-  bottom: 20px; left: 0;
-  width: 40px; height: 80px;
-  background: #888;
-  border: 4px solid var(--border-color);
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  bottom: 20px;
+  left: -10px;
+  width: 24px;
+  height: 60px;
+  background: var(--muted-foreground);
+  border: 4px solid var(--foreground);
+  border-radius: 0; /* Square base */
+  box-shadow: 4px 4px 0 var(--shadow-color);
 }
 
 .lever-stick {
   position: absolute;
-  bottom: 60px; left: 12px; /* Centered in base (40-16)/2 = 12 */
-  width: 16px; height: 180px;
-  background: #ccc;
-  border: 4px solid var(--border-color);
+  bottom: 50px;
+  left: -2px; /* Center relative to base? Base is 24px wide (-10px left). Stick is 8px wide. */
+  /* Base center is roughly left + width/2 = -10 + 12 = 2px. Stick left -2 + 4 = 2px. Close enough. */
+  width: 12px;
+  height: 180px; 
+  background: var(--secondary);
+  border: 4px solid var(--foreground);
   transform-origin: bottom center;
+  /* Pixel look: no smoothing */
 }
 
-/* Pixel Knob */
+/* The Knob - PIXEL SPHERE (Square) */
 .lever-knob {
   position: absolute;
-  top: -24px; left: 50%;
+  top: -20px;
+  left: 50%;
   transform: translateX(-50%);
-  width: 48px; height: 48px;
-  background: var(--primary-red);
-  border: 4px solid var(--border-color);
-  box-shadow: inset 4px 4px 0 rgba(255,255,255,0.4);
+  width: 40px;
+  height: 40px;
+  background: var(--destructive);
+  border-radius: 0; /* SQUARE */
+  border: 4px solid var(--foreground);
+  /* Pixel highlight */
+  box-shadow: inset 4px 4px 0 rgba(255,255,255,0.4), 4px 4px 0 rgba(0,0,0,0.2);
 }
 
+/* Lever Pull Animation - Hard Rotation */
 .lever-container.pulled .lever-stick {
-  transform: rotate(45deg);
+   transform: rotate(45deg); 
 }
 
-/* Result Box - NES Dialog Style */
+/* Result Box */
 .result-box {
-  background: var(--text-color); /* Dark box */
-  color: white;
-  padding: 20px;
-  margin-top: 20px;
-  width: 380px;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 15px 25px;
+  border: 4px solid var(--primary);
+  /* Hard shadow */
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  animation: popIn 0.3s steps(4, end); /* Steps animation for choppy pixel feel */
+  max-width: 90%;
   text-align: center;
-  position: relative;
-  
-  /* Pixel Border (White on Black) */
-  box-shadow: 
-    -4px 0 0 0 white,
-    4px 0 0 0 white,
-    0 -4px 0 0 white,
-    0 4px 0 0 white;
-  margin: 4px; /* Offset for border */
-  
-  animation: typeIn 0.5s steps(20, end);
+}
+
+.result-box .label {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .result-box.hidden {
   display: none;
 }
 
-.result-box .label {
-  display: block;
-  color: var(--primary-gold);
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  text-transform: uppercase;
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .winner-pulse {
-  animation: blink 0.5s step-end infinite alternate;
-  color: var(--primary-red);
+  animation: pulse 0.5s steps(2, start) infinite alternate;
 }
 
-@keyframes blink {
-  0% { opacity: 1; }
-  100% { opacity: 0.5; }
-}
-
-/* Mobile Responsive */
-@media (max-width: 500px) {
-  .slot-machine-container {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .lever-container {
-    height: 100px;
-    width: 300px;
-    margin-top: -20px;
-    /* Transform to horizontal lever for mobile? Or just keep simple */
-    transform: rotate(-90deg);
-    transform-origin: center;
-    /* Actually a horizontal lever is tricky. Let's just scale it down or keep it side if fits. */
-    /* Better: Move it below the machine */
-  }
-  
-  .lever-stick {
-    height: 100px; /* Shorter stick */
-  }
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
 }
