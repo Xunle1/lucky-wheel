@@ -18,35 +18,15 @@
   --border: oklch(0.6209 0.1801 348.1385);
   --input: oklch(0.9189 0 0);
   --ring: oklch(0.7002 0.1597 350.7532);
-  --chart-1: oklch(0.7002 0.1597 350.7532);
-  --chart-2: oklch(0.8189 0.0799 212.0892);
-  --chart-3: oklch(0.9195 0.0801 87.6670);
-  --chart-4: oklch(0.7998 0.1110 348.1791);
-  --chart-5: oklch(0.6197 0.1899 353.9091);
-  --sidebar: oklch(0.9140 0.0424 343.0913);
-  --sidebar-foreground: oklch(0.3211 0 0);
-  --sidebar-primary: oklch(0.6559 0.2118 354.3084);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.8228 0.1095 346.0184);
-  --sidebar-accent-foreground: oklch(0.3211 0 0);
-  --sidebar-border: oklch(0.9464 0.0327 307.1745);
-  --sidebar-ring: oklch(0.6559 0.2118 354.3084);
   --font-pixel: 'VT323', monospace;
   --radius: 0.4rem;
-  --shadow-x: 3px;
-  --shadow-y: 3px;
-  --shadow-blur: 0px;
-  --shadow-spread: 0px;
-  --shadow-opacity: 1.0;
   --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
-  --shadow-2xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
-  --shadow-xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
-  --shadow-sm: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-  --shadow: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-  --shadow-md: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 2px 4px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-  --shadow-lg: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 4px 6px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-  --shadow-xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 8px 10px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
-  --shadow-2xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 2.50);
+}
+
+/* Global Reset for Pixel Font */
+* {
+  font-family: var(--font-pixel) !important;
+  box-sizing: border-box;
 }
 
 body {
@@ -54,13 +34,15 @@ body {
   padding: 0;
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-pixel);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   overflow: hidden;
   image-rendering: pixelated;
+  /* Disable smoothing for sharper pixels */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .main-container {
@@ -75,7 +57,7 @@ header {
 }
 
 header h1 {
-  font-size: 4rem;
+  font-size: 5rem;
   margin: 0;
   color: var(--primary);
   text-shadow: 4px 4px 0px var(--shadow-color);
@@ -83,7 +65,7 @@ header h1 {
 }
 
 header p {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 0;
   color: var(--muted-foreground);
   text-transform: uppercase;
@@ -92,23 +74,21 @@ header p {
 /* Slot Machine Structure */
 .slot-machine-container {
   display: flex;
-  align-items: center; /* Align lever with machine */
+  align-items: center;
   gap: 20px;
-  transform: translateX(30px); /* Center visually including lever */
+  transform: translateX(30px);
 }
 
-/* The Machine Box */
 .machine-body {
   background-color: var(--card);
   border: 4px solid var(--border);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 8px 8px 0px var(--shadow-color);
-  width: 320px; /* Slightly wider for longer text */
+  width: 320px;
   position: relative;
 }
 
-/* Screen Border */
 .screen-border {
   background-color: var(--input);
   padding: 15px;
@@ -117,9 +97,8 @@ header p {
   box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
 }
 
-/* The Spinner Window */
 .spinner-window {
-  height: 160px; /* Increased height for multiline */
+  height: 160px;
   background: white;
   overflow: hidden;
   position: relative;
@@ -135,40 +114,39 @@ header p {
 }
 
 .spinner-item {
-  height: 160px; /* Must match window height */
+  height: 160px;
   flex-shrink: 0;
   display: flex;
-  flex-direction: column; /* Stack title, recipe, desc */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.1;
   padding: 0 10px;
   border-bottom: 1px dashed var(--muted);
   box-sizing: border-box;
 }
 
-/* Drink specific styles */
 .drink-title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   color: var(--primary);
   margin-bottom: 5px;
+  text-transform: uppercase;
 }
 
 .drink-recipe {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: var(--foreground);
   margin-bottom: 5px;
 }
 
 .drink-desc {
-  font-size: 1.0rem;
+  font-size: 1.2rem;
   color: var(--muted-foreground);
   font-style: italic;
 }
 
-/* Pixel Reflection / Glare */
 .pixel-reflection {
   position: absolute;
   top: 0;
@@ -193,7 +171,6 @@ header p {
   opacity: 0.3;
 }
 
-/* Details on the machine */
 .machine-details {
   display: flex;
   justify-content: space-between;
@@ -213,10 +190,8 @@ header p {
   width: 60px;
   height: 200px;
   cursor: pointer;
-  transition: transform 0.1s;
 }
 
-/* Base attached to machine */
 .lever-base {
   position: absolute;
   bottom: 20px;
@@ -228,7 +203,6 @@ header p {
   border-radius: 4px;
 }
 
-/* The stick */
 .lever-stick {
   position: absolute;
   bottom: 50px;
@@ -238,14 +212,12 @@ header p {
   background: var(--secondary);
   border: 2px solid var(--foreground);
   transform-origin: bottom center;
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* The knob - now nested inside stick */
 .lever-knob {
   position: absolute;
-  top: -15px; /* Offset from top of stick */
-  left: 50%; /* Center horizontally */
+  top: -15px;
+  left: 50%;
   transform: translateX(-50%);
   width: 30px;
   height: 30px;
@@ -255,22 +227,24 @@ header p {
   box-shadow: inset -4px -4px 0px rgba(0,0,0,0.2);
 }
 
-/* Lever Pull Animation Classes */
-.lever-container.pulled .lever-stick {
-   transform: rotate(45deg); 
-}
-
 /* Result Box */
 .result-box {
   background: var(--foreground);
   color: var(--background);
-  padding: 10px 20px;
+  padding: 15px 25px;
   border: 4px solid var(--primary);
-  font-size: 1.5rem; /* Slightly smaller for long text */
   box-shadow: 4px 4px 0px var(--shadow-color);
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  max-width: 80%;
+  max-width: 90%;
   text-align: center;
+}
+
+.result-box .label {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 2px;
 }
 
 .result-box.hidden {
@@ -283,7 +257,6 @@ header p {
 }
 
 .winner-pulse {
-  /* Only pulse the container, or maybe specific text later */
   animation: pulse 0.5s ease-in-out infinite alternate;
 }
 
