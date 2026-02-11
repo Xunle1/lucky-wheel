@@ -77,8 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
     const leverContainer = document.getElementById('leverContainer'); 
     const leverStick = document.querySelector('.lever-stick'); 
-    const resultDisplay = document.getElementById('result-display');
-    const resultText = document.getElementById('result-text');
     
     let itemHeight = 240; 
     const REPEAT_COUNT = 150; // Increased for longer duration
@@ -140,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startSpin() {
         isSpinning = true;
-        resultDisplay.classList.add('hidden');
         
         const items = document.querySelectorAll('.spinner-item');
         items.forEach(i => i.classList.remove('winner-pulse'));
@@ -196,8 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const items = document.querySelectorAll('.spinner-item');
         if (items[winnerIndex]) {
             items[winnerIndex].classList.add('winner-pulse');
-            resultText.innerHTML = items[winnerIndex].innerHTML;
-            resultDisplay.classList.remove('hidden');
         }
         
         playWinSound();
