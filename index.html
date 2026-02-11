@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>命运酒单转盘</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Festive Header -->
+        <header>
+            <h1>🎉 命运之轮 🎉</h1>
+            <p>今晚喝什么？</p>
+        </header>
+
+        <!-- The Spinner Box (Hearthstone-like window) -->
+        <div class="spinner-frame">
+            <div class="spinner-window">
+                <div class="spinner-list" id="spinnerList">
+                    <!-- Items will be injected by JS -->
+                </div>
+                <!-- The selection line overlay -->
+                <div class="selection-line"></div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="spinBtn" class="spin-button">开始寻酒</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

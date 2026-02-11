@@ -1,0 +1,175 @@
+:root {
+    --gold: #f2c94c;
+    --red: #d92027;
+    --dark-bg: #2c0404;
+    --wood: #5e3b23;
+    --text-color: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--dark-bg);
+    background-image: radial-gradient(circle at center, #4a0e0e 0%, #1a0202 100%);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.main-container {
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    z-index: 1;
+}
+
+header h1 {
+    color: var(--gold);
+    text-shadow: 2px 2px 0px #000, 0 0 15px rgba(242, 201, 76, 0.5);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    color: #ddd;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+/* The Spinner Frame */
+.spinner-frame {
+    background: var(--wood);
+    padding: 15px;
+    border-radius: 10px;
+    border: 4px solid var(--gold);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+/* Shiny accents on the frame corners */
+.spinner-frame::before, .spinner-frame::after {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: var(--gold);
+    border-radius: 50%;
+    top: 10px;
+    box-shadow: 0 0 10px var(--gold);
+}
+.spinner-frame::before { left: 10px; }
+.spinner-frame::after { right: 10px; }
+
+/* The visible window */
+.spinner-window {
+    height: 120px; /* Show exactly one item ideally, or partial */
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    border-radius: 4px;
+    border: 2px solid #333;
+    /* Inner shadow to give depth */
+    box-shadow: inset 0 10px 10px rgba(0,0,0,0.9), inset 0 -10px 10px rgba(0,0,0,0.9);
+}
+
+/* The scrolling list */
+.spinner-list {
+    position: relative;
+    top: 0;
+    /* Will be animated by JS */
+}
+
+.spinner-item {
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+    padding: 0 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* The highlight line */
+.selection-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(242, 201, 76, 0.3);
+    transform: translateY(-50%);
+    pointer-events: none;
+    box-shadow: 0 0 10px var(--gold);
+    z-index: 10;
+}
+
+/* Button */
+.spin-button {
+    background: linear-gradient(to bottom, #ff5e62, #ff9966); /* Red/Orange gradient */
+    background: var(--red);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 3px solid var(--gold);
+    padding: 15px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #8b0000, 0 10px 20px rgba(0,0,0,0.4);
+    transition: all 0.1s;
+    outline: none;
+}
+
+.spin-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #8b0000, 0 5px 10px rgba(0,0,0,0.4);
+}
+
+.spin-button:disabled {
+    background: #555;
+    border-color: #888;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: translateY(4px);
+}
+
+/* Winner Animation Class */
+.winner-pulse {
+    animation: pulse 0.5s ease-in-out infinite alternate;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold);
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+
+/* Confetti (Simple CSS only approach or we can use JS canvas later if needed, stick to simple for now) */
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    background-color: #f2d74e;
+    animation: confetti-fall 3s linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
