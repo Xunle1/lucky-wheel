@@ -1,175 +1,278 @@
 :root {
-    --gold: #f2c94c;
-    --red: #d92027;
-    --dark-bg: #2c0404;
-    --wood: #5e3b23;
-    --text-color: #fff;
-}
-
-* {
-    box-sizing: border-box;
-    user-select: none;
+  --background: oklch(0.9399 0.0203 345.6985);
+  --foreground: oklch(0.4712 0 0);
+  --card: oklch(0.9498 0.0500 86.8891);
+  --card-foreground: oklch(0.4712 0 0);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.4712 0 0);
+  --primary: oklch(0.6209 0.1801 348.1385);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.8095 0.0694 198.1863);
+  --secondary-foreground: oklch(0.3211 0 0);
+  --muted: oklch(0.8800 0.0504 212.0952);
+  --muted-foreground: oklch(0.5795 0 0);
+  --accent: oklch(0.9195 0.0801 87.6670);
+  --accent-foreground: oklch(0.3211 0 0);
+  --destructive: oklch(0.7091 0.1697 21.9551);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0.6209 0.1801 348.1385);
+  --input: oklch(0.9189 0 0);
+  --ring: oklch(0.7002 0.1597 350.7532);
+  --chart-1: oklch(0.7002 0.1597 350.7532);
+  --chart-2: oklch(0.8189 0.0799 212.0892);
+  --chart-3: oklch(0.9195 0.0801 87.6670);
+  --chart-4: oklch(0.7998 0.1110 348.1791);
+  --chart-5: oklch(0.6197 0.1899 353.9091);
+  --sidebar: oklch(0.9140 0.0424 343.0913);
+  --sidebar-foreground: oklch(0.3211 0 0);
+  --sidebar-primary: oklch(0.6559 0.2118 354.3084);
+  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-accent: oklch(0.8228 0.1095 346.0184);
+  --sidebar-accent-foreground: oklch(0.3211 0 0);
+  --sidebar-border: oklch(0.9464 0.0327 307.1745);
+  --sidebar-ring: oklch(0.6559 0.2118 354.3084);
+  --font-pixel: 'VT323', monospace;
+  --radius: 0.4rem;
+  --shadow-x: 3px;
+  --shadow-y: 3px;
+  --shadow-blur: 0px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 1.0;
+  --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
+  --shadow-2xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
+  --shadow-xs: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 0.50);
+  --shadow-sm: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
+  --shadow: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 1px 2px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
+  --shadow-md: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 2px 4px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
+  --shadow-lg: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 4px 6px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
+  --shadow-xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 1.00), 3px 8px 10px -1px hsl(325.7800 58.1800% 56.8600% / 1.00);
+  --shadow-2xl: 3px 3px 0px 0px hsl(325.7800 58.1800% 56.8600% / 2.50);
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--dark-bg);
-    background-image: radial-gradient(circle at center, #4a0e0e 0%, #1a0202 100%);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-pixel);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  image-rendering: pixelated;
 }
 
 .main-container {
-    text-align: center;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-    z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+header {
+  text-align: center;
 }
 
 header h1 {
-    color: var(--gold);
-    text-shadow: 2px 2px 0px #000, 0 0 15px rgba(242, 201, 76, 0.5);
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+  font-size: 4rem;
+  margin: 0;
+  color: var(--primary);
+  text-shadow: 4px 4px 0px var(--shadow-color);
+  letter-spacing: 4px;
 }
 
 header p {
-    color: #ddd;
-    margin-top: 0;
-    margin-bottom: 2rem;
-    font-style: italic;
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
 }
 
-/* The Spinner Frame */
-.spinner-frame {
-    background: var(--wood);
-    padding: 15px;
-    border-radius: 10px;
-    border: 4px solid var(--gold);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.8);
-    position: relative;
-    margin-bottom: 2rem;
+/* Slot Machine Structure */
+.slot-machine-container {
+  display: flex;
+  align-items: center; /* Align lever with machine */
+  gap: 20px;
+  transform: translateX(30px); /* Center visually including lever */
 }
 
-/* Shiny accents on the frame corners */
-.spinner-frame::before, .spinner-frame::after {
-    content: '';
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    background: var(--gold);
-    border-radius: 50%;
-    top: 10px;
-    box-shadow: 0 0 10px var(--gold);
+/* The Machine Box */
+.machine-body {
+  background-color: var(--card);
+  border: 4px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  width: 300px;
+  position: relative;
 }
-.spinner-frame::before { left: 10px; }
-.spinner-frame::after { right: 10px; }
 
-/* The visible window */
+/* Screen Border */
+.screen-border {
+  background-color: var(--input);
+  padding: 15px;
+  border: 4px solid var(--secondary-foreground);
+  border-radius: 4px;
+  box-shadow: inset 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+/* The Spinner Window */
 .spinner-window {
-    height: 120px; /* Show exactly one item ideally, or partial */
-    background: #000;
-    overflow: hidden;
-    position: relative;
-    border-radius: 4px;
-    border: 2px solid #333;
-    /* Inner shadow to give depth */
-    box-shadow: inset 0 10px 10px rgba(0,0,0,0.9), inset 0 -10px 10px rgba(0,0,0,0.9);
+  height: 120px;
+  background: white;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid var(--border);
 }
 
-/* The scrolling list */
 .spinner-list {
-    position: relative;
-    top: 0;
-    /* Will be animated by JS */
+  position: relative;
+  top: 0;
 }
 
 .spinner-item {
-    height: 120px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 1px 1px 2px #000;
-    padding: 0 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  color: var(--foreground);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
 }
 
-/* The highlight line */
+/* Pixel Reflection / Glare */
+.pixel-reflection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: rgba(255,255,255,0.4);
+  pointer-events: none;
+}
+
 .selection-line {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: rgba(242, 201, 76, 0.3);
-    transform: translateY(-50%);
-    pointer-events: none;
-    box-shadow: 0 0 10px var(--gold);
-    z-index: 10;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--destructive);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.5;
 }
 
-/* Button */
-.spin-button {
-    background: linear-gradient(to bottom, #ff5e62, #ff9966); /* Red/Orange gradient */
-    background: var(--red);
-    color: white;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border: 3px solid var(--gold);
-    padding: 15px 40px;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 5px 0 #8b0000, 0 10px 20px rgba(0,0,0,0.4);
-    transition: all 0.1s;
-    outline: none;
+/* Details on the machine */
+.machine-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
-.spin-button:active {
-    transform: translateY(4px);
-    box-shadow: 0 1px 0 #8b0000, 0 5px 10px rgba(0,0,0,0.4);
+.detail-stripe {
+  height: 10px;
+  width: 40%;
+  background-color: var(--secondary);
+  border-radius: 2px;
 }
 
-.spin-button:disabled {
-    background: #555;
-    border-color: #888;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: translateY(4px);
+/* Lever Mechanism */
+.lever-container {
+  position: relative;
+  width: 60px;
+  height: 200px;
+  cursor: pointer;
+  transition: transform 0.1s;
 }
 
-/* Winner Animation Class */
+/* Base attached to machine */
+.lever-base {
+  position: absolute;
+  bottom: 20px;
+  left: -10px;
+  width: 20px;
+  height: 60px;
+  background: var(--muted-foreground);
+  border: 2px solid var(--foreground);
+  border-radius: 4px;
+}
+
+/* The stick */
+.lever-stick {
+  position: absolute;
+  bottom: 50px;
+  left: -2px;
+  width: 8px;
+  height: 100px;
+  background: var(--secondary);
+  border: 2px solid var(--foreground);
+  transform-origin: bottom center;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* The knob */
+.lever-knob {
+  position: absolute;
+  top: -20px; /* Relative to stick top via transform logic in JS or just simple CSS here */
+  left: -11px; /* Center on stick (8px width) -> (30-8)/2 ... wait. Knob is 30px. Stick is 8px. */
+  /* Actually, let's place knob inside stick or relative to container */
+  width: 30px;
+  height: 30px;
+  background: var(--destructive);
+  border-radius: 50%;
+  border: 2px solid var(--foreground);
+  box-shadow: inset -4px -4px 0px rgba(0,0,0,0.2);
+  
+  /* Positioning the knob at the top of the stick */
+  transform: translateY(40px); /* Initial position */
+  transition: transform 0.5s;
+}
+
+/* Lever Pull Animation Classes */
+.lever-container.pulled .lever-stick {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease-in;
+}
+
+/* Since knob is separate in DOM, we might need a better structure for pure CSS rotation or just animate stick and knob follows if nested. 
+   Let's adjust structure for simpler animation: Stick contains Knob? 
+   No, let's keep separate but use the stick's transform to move knob if possible.
+   Easier: Just simple CSS animation on the container or handle in JS.
+   Let's refine CSS for "pulled" state.
+*/
+
+.lever-container.pulled .lever-stick {
+   transform: scaleY(-1); /* Flip down? No, rotate around bottom */
+   /* rotate(150deg) looks like pulling down */
+   transform: rotate(45deg); 
+}
+
+/* Result Box */
+.result-box {
+  background: var(--foreground);
+  color: var(--background);
+  padding: 10px 20px;
+  border: 4px solid var(--primary);
+  font-size: 2rem;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.result-box.hidden {
+  display: none;
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 .winner-pulse {
-    animation: pulse 0.5s ease-in-out infinite alternate;
-    color: var(--gold);
-    text-shadow: 0 0 20px var(--gold);
-}
-
-@keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.1); }
-}
-
-/* Confetti (Simple CSS only approach or we can use JS canvas later if needed, stick to simple for now) */
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    top: -20px;
-    background-color: #f2d74e;
-    animation: confetti-fall 3s linear forwards;
-}
-
-@keyframes confetti-fall {
-    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  color: var(--destructive);
+  text-shadow: 2px 2px 0px var(--foreground);
 }

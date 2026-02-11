@@ -4,32 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>命运酒单转盘</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="main-container">
-        <!-- Festive Header -->
+        <!-- Header -->
         <header>
-            <h1>🎉 命运之轮 🎉</h1>
-            <p>今晚喝什么？</p>
+            <h1>PIXEL BAR</h1>
+            <p>INSERT COIN OR PULL LEVER</p>
         </header>
 
-        <!-- The Spinner Box (Hearthstone-like window) -->
-        <div class="spinner-frame">
-            <div class="spinner-window">
-                <div class="spinner-list" id="spinnerList">
-                    <!-- Items will be injected by JS -->
+        <!-- Slot Machine Component -->
+        <div class="slot-machine-container">
+            <!-- The Machine Body -->
+            <div class="machine-body">
+                <div class="screen-border">
+                    <div class="spinner-window">
+                        <div class="spinner-list" id="spinnerList">
+                            <!-- Items will be injected by JS -->
+                        </div>
+                        <div class="selection-line"></div>
+                        <div class="pixel-reflection"></div>
+                    </div>
                 </div>
-                <!-- The selection line overlay -->
-                <div class="selection-line"></div>
+                
+                <div class="machine-details">
+                    <div class="detail-stripe"></div>
+                    <div class="detail-stripe"></div>
+                </div>
+            </div>
+
+            <!-- The Lever -->
+            <div class="lever-container" id="leverContainer">
+                <div class="lever-base"></div>
+                <div class="lever-stick"></div>
+                <div class="lever-knob"></div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <button id="spinBtn" class="spin-button">开始寻酒</button>
+        <!-- Result Display (Game Over style) -->
+        <div id="result-display" class="result-box hidden">
+            <span class="label">WINNER:</span>
+            <span id="result-text">???</span>
         </div>
+
     </div>
 
     <!-- Scripts -->

@@ -7,66 +7,93 @@ function initAudio() {
     }
 }
 
-// Sound Synthesis Functions
+// Retro 8-bit Sound Synthesis
 function playTickSound() {
     if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
-    // Woodblock-ish sound
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+    // Short blip
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
     
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
     
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.1);
+    osc.stop(audioCtx.currentTime + 0.05);
 }
 
 function playWinSound() {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     
-    // Simple Fanfare Arpeggio
-    [440, 554, 659, 880].forEach((freq, i) => {
+    // 8-bit Victory Jingle
+    const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50]; // C E G C G C
+    const duration = 0.1;
+    
+    notes.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         
         osc.type = 'square';
         osc.frequency.value = freq;
         
-        const startTime = now + i * 0.1;
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(0.1, startTime + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.5);
+        const startTime = now + i * duration;
+        gain.gain.setValueAtTime(0.1, startTime);
+        gain.gain.linearRampToValueAtTime(0, startTime + duration - 0.01);
         
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         
         osc.start(startTime);
-        osc.stop(startTime + 0.6);
+        osc.stop(startTime + duration);
     });
+}
+
+function playLeverSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    // Mechanical clunk
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+    
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.2);
 }
 
 // Logic
 document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
-    const spinBtn = document.getElementById('spinBtn');
+    const leverContainer = document.getElementById('leverContainer'); // Clickable area
+    const leverStick = document.querySelector('.lever-stick'); // The animated part
+    const resultDisplay = document.getElementById('result-display');
+    const resultText = document.getElementById('result-text');
     
     const ITEM_HEIGHT = 120; // Must match CSS
-    // How many times we repeat the list to ensure we can scroll "forever"
     const REPEAT_COUNT = 50; 
     
     // 1. Populate List
-    // We create a massive list so we can just scroll down a huge distance
     let fullList = [];
-    for(let i=0; i<REPEAT_COUNT; i++) {
-        fullList = fullList.concat(DRINKS);
+    if (typeof DRINKS !== 'undefined') {
+        for(let i=0; i<REPEAT_COUNT; i++) {
+            fullList = fullList.concat(DRINKS);
+        }
+    } else {
+        fullList = ["Error: No Config", "Check config.js"];
     }
     
     fullList.forEach(drink => {
@@ -79,73 +106,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. State
     let isSpinning = false;
     
-    spinBtn.addEventListener('click', async () => {
+    leverContainer.addEventListener('click', async () => {
         if (isSpinning) return;
         
-        // Init audio on first user gesture
+        // Init audio
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') {
             await audioCtx.resume();
         }
         
-        startSpin();
+        playLeverSound();
+        animateLever();
+        
+        // Small delay to match lever pull
+        setTimeout(() => {
+            startSpin();
+        }, 300);
     });
+
+    function animateLever() {
+        // Simple CSS class toggle for animation
+        // We'll define .pulled in CSS to rotate the stick
+        // Actually, let's just animate via style directly for control or class
+        // Let's use a class that triggers a keyframe or transition
+        leverStick.style.transformOrigin = "bottom center";
+        leverStick.style.transition = "transform 0.2s ease-in";
+        leverStick.style.transform = "rotate(45deg)"; // Pull down
+        
+        setTimeout(() => {
+            leverStick.style.transition = "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"; // Spring back
+            leverStick.style.transform = "rotate(0deg)";
+        }, 300);
+    }
 
     function startSpin() {
         isSpinning = true;
-        spinBtn.disabled = true;
-        spinBtn.textContent = "转动中...";
+        resultDisplay.classList.add('hidden');
         
-        // Remove winner styles if any
+        // Remove winner styles
         const items = document.querySelectorAll('.spinner-item');
         items.forEach(i => i.classList.remove('winner-pulse'));
 
-        // Calculate a random landing spot
-        // We want to land somewhere deep in the list (e.g., between 1/2 and 3/4 way down)
-        // This ensures the animation is long enough
         const minIndex = Math.floor(fullList.length / 2);
-        const maxIndex = fullList.length - 10; // Don't go to very end
+        const maxIndex = fullList.length - 10;
         const winnerIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
         
-        // The pixel position to scroll to
-        // We want the winner to be centered in the 120px window.
-        // The window is 120px tall. The item is 120px tall. 
-        // So scrolling to (index * 120) puts that item at the top of the container.
         const targetScrollTop = winnerIndex * ITEM_HEIGHT;
         
-        // Current position
-        const startScrollTop = spinnerList.scrollTop;
-        
-        // Reset to top if we are too far down (this effectively "loops" it for next time invisibly if needed, 
-        // but since we just built the list, we assume we start near 0 or previous end.
-        // Actually, to make it simple, let's just animate from current to target.
-        // Note: If previous spin ended deep, we might run out of list.
-        // BETTER APPROACH for "Spin Again": Reset list to top (visually seamless if we align items) 
-        // but for simplicity in this V1, let's just reset to 0 immediately before spinning.
-        // It happens so fast the user won't notice, or it looks like a "reset".
+        // Reset visually
         spinnerList.style.transition = 'none';
         spinnerList.scrollTop = 0;
         
         // Force Reflow
         spinnerList.offsetHeight; 
         
-        // Animation Paramaters
-        const duration = 4000; // 4 seconds
+        const duration = 3000; 
         const startTime = performance.now();
         
         function animate(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Easing function: EaseOutCubic (starts fast, slows down)
+            // EaseOutCubic
             const ease = 1 - Math.pow(1 - progress, 3);
             
             const currentScroll = ease * targetScrollTop;
             spinnerList.scrollTop = currentScroll;
             
-            // Audio Tick Logic
-            // We play a tick every time we cross an item boundary
-            // We can approximate this by checking current item index vs previous
+            // Audio Tick
             const currentItemIndex = Math.floor(currentScroll / ITEM_HEIGHT);
             if (animate.lastIndex !== currentItemIndex) {
                 playTickSound();
@@ -165,8 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function finishSpin(winnerIndex) {
         isSpinning = false;
-        spinBtn.disabled = false;
-        spinBtn.textContent = "再来一次";
         
         // Highlight winner
         const items = document.querySelectorAll('.spinner-item');
@@ -174,24 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
             items[winnerIndex].classList.add('winner-pulse');
             // Ensure exact alignment
              spinnerList.scrollTop = winnerIndex * ITEM_HEIGHT;
+             
+             // Show result box
+             resultText.textContent = items[winnerIndex].textContent;
+             resultDisplay.classList.remove('hidden');
         }
         
         playWinSound();
-        fireConfetti();
-    }
-
-    function fireConfetti() {
-        const colors = ['#f2c94c', '#d92027', '#ffffff'];
-        for (let i = 0; i < 50; i++) {
-            const conf = document.createElement('div');
-            conf.className = 'confetti';
-            conf.style.left = Math.random() * 100 + 'vw';
-            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(conf);
-            
-            // Cleanup
-            setTimeout(() => conf.remove(), 4000);
-        }
     }
 });
