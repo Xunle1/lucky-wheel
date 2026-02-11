@@ -13,7 +13,6 @@ function playTickSound() {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
-    // Short blip
     osc.type = 'square';
     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
@@ -32,8 +31,7 @@ function playWinSound() {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     
-    // 8-bit Victory Jingle
-    const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50]; // C E G C G C
+    const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50]; 
     const duration = 0.1;
     
     notes.forEach((freq, i) => {
@@ -60,7 +58,6 @@ function playLeverSound() {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
-    // Mechanical clunk
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(100, audioCtx.currentTime);
     osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.2);
@@ -78,13 +75,13 @@ function playLeverSound() {
 // Logic
 document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
-    const leverContainer = document.getElementById('leverContainer'); // Clickable area
-    const leverStick = document.querySelector('.lever-stick'); // The animated part
+    const leverContainer = document.getElementById('leverContainer'); 
+    const leverStick = document.querySelector('.lever-stick'); 
     const resultDisplay = document.getElementById('result-display');
     const resultText = document.getElementById('result-text');
     
-    const ITEM_HEIGHT = 140; // Updated Height for new content
-    const REPEAT_COUNT = 50; 
+    const ITEM_HEIGHT = 160; // Increased to 160px for better fit
+    const REPEAT_COUNT = 100; // More items for longer spin illusion
     
     // 1. Populate List
     let fullList = [];
@@ -99,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullList.forEach(drink => {
         const el = document.createElement('div');
         el.className = 'spinner-item';
-        el.innerHTML = drink; // Use innerHTML to parse the HTML strings
+        el.innerHTML = drink; 
         spinnerList.appendChild(el);
     });
 
@@ -109,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
     leverContainer.addEventListener('click', async () => {
         if (isSpinning) return;
         
-        // Init audio
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') {
             await audioCtx.resume();
@@ -118,20 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
         playLeverSound();
         animateLever();
         
-        // Small delay to match lever pull
         setTimeout(() => {
             startSpin();
         }, 300);
     });
 
     function animateLever() {
-        // Lever Animation
         leverStick.style.transformOrigin = "bottom center";
         leverStick.style.transition = "transform 0.2s ease-in";
-        leverStick.style.transform = "rotate(45deg)"; // Pull down
+        leverStick.style.transform = "rotate(45deg)"; 
         
         setTimeout(() => {
-            leverStick.style.transition = "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"; // Spring back
+            leverStick.style.transition = "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"; 
             leverStick.style.transform = "rotate(0deg)";
         }, 300);
     }
@@ -140,24 +134,26 @@ document.addEventListener('DOMContentLoaded', () => {
         isSpinning = true;
         resultDisplay.classList.add('hidden');
         
-        // Remove winner styles
         const items = document.querySelectorAll('.spinner-item');
         items.forEach(i => i.classList.remove('winner-pulse'));
 
+        // Pick a winner deep in the list
+        // Since we use transform, we just move DOWN (negative Y)
         const minIndex = Math.floor(fullList.length / 2);
         const maxIndex = fullList.length - 10;
         const winnerIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
         
-        const targetScrollTop = winnerIndex * ITEM_HEIGHT;
+        // Calculate target position (negative value to move up)
+        const targetTranslateY = -(winnerIndex * ITEM_HEIGHT);
         
-        // Reset visually
+        // Reset visually to 0 (or close to 0 if we want to loop seamlessly, but reset is fine)
         spinnerList.style.transition = 'none';
-        spinnerList.scrollTop = 0;
+        spinnerList.style.transform = 'translateY(0px)';
         
         // Force Reflow
         spinnerList.offsetHeight; 
         
-        const duration = 3000; 
+        const duration = 3500; 
         const startTime = performance.now();
         
         function animate(currentTime) {
@@ -167,11 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // EaseOutCubic
             const ease = 1 - Math.pow(1 - progress, 3);
             
-            const currentScroll = ease * targetScrollTop;
-            spinnerList.scrollTop = currentScroll;
+            // We want to go from 0 to targetTranslateY
+            const currentTranslateY = ease * targetTranslateY;
+            spinnerList.style.transform = `translateY(${currentTranslateY}px)`;
             
-            // Audio Tick
-            const currentItemIndex = Math.floor(currentScroll / ITEM_HEIGHT);
+            // Audio Tick logic
+            // currentTranslateY is negative. 
+            // Index = abs(currentTranslateY) / HEIGHT
+            const currentItemIndex = Math.floor(Math.abs(currentTranslateY) / ITEM_HEIGHT);
             if (animate.lastIndex !== currentItemIndex) {
                 playTickSound();
                 animate.lastIndex = currentItemIndex;
@@ -180,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                finishSpin(winnerIndex);
+                finishSpin(winnerIndex, targetTranslateY);
             }
         }
         
@@ -188,20 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(animate);
     }
 
-    function finishSpin(winnerIndex) {
+    function finishSpin(winnerIndex, finalPosition) {
         isSpinning = false;
         
-        // Highlight winner
+        // Ensure exact alignment
+        spinnerList.style.transform = `translateY(${finalPosition}px)`;
+        
         const items = document.querySelectorAll('.spinner-item');
         if (items[winnerIndex]) {
             items[winnerIndex].classList.add('winner-pulse');
-            // Ensure exact alignment
-             spinnerList.scrollTop = winnerIndex * ITEM_HEIGHT;
-             
-             // Show result box
-             // Use innerHTML to show formatted text in result box too? 
-             // Or just "YOU WON: [Title]"?
-             // Let's just copy the content.
+            
+             // Populate result box with clean text (stripping HTML for title if needed, or just reusing innerHTML)
+             // Using innerHTML is safest for the styled content.
              resultText.innerHTML = items[winnerIndex].innerHTML;
              resultDisplay.classList.remove('hidden');
         }
