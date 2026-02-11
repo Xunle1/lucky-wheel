@@ -1,0 +1,7 @@
+# Ignore system files
+.DS_Store
+node_modules/
+dist/
+
+# Ignore local reference files
+sui-red-packet_vercel_app.html
