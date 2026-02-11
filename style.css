@@ -85,7 +85,7 @@ header p {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 8px 8px 0px var(--shadow-color);
-  width: 320px;
+  width: 360px; /* Widened to fit text */
   position: relative;
 }
 
@@ -98,7 +98,7 @@ header p {
 }
 
 .spinner-window {
-  height: 200px;
+  height: 240px; /* Increased height for breathing room */
   background: white;
   overflow: hidden;
   position: relative;
@@ -114,37 +114,40 @@ header p {
 }
 
 .spinner-item {
-  height: 200px;
+  height: 240px; /* Matches window height */
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  line-height: 1.1;
-  padding: 0 10px;
-  border-bottom: 1px dashed var(--muted);
+  line-height: 1.2;
+  padding: 0 15px; /* More padding */
+  border-bottom: 2px solid var(--muted); /* Stronger divider */
   box-sizing: border-box;
 }
 
 .drink-title {
-  font-size: 2rem;
+  font-size: 2rem; /* Adjusted size */
   font-weight: bold;
   color: var(--primary);
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .drink-recipe {
-  font-size: 1.4rem;
+  font-size: 1.4rem; /* Adjusted size */
   color: var(--foreground);
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  line-height: 1.3;
 }
 
 .drink-desc {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--muted-foreground);
   font-style: italic;
+  max-width: 90%;
 }
 
 .pixel-reflection {
@@ -163,12 +166,13 @@ header p {
   top: 50%;
   left: 0;
   width: 100%;
-  height: 4px;
-  background: var(--destructive);
+  height: 2px; /* Thinner line */
+  background: var(--destructive); /* Red line */
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 10;
-  opacity: 0.3;
+  opacity: 0.2; /* Subtler */
+  border-radius: 2px;
 }
 
 .machine-details {
@@ -188,7 +192,7 @@ header p {
 .lever-container {
   position: relative;
   width: 60px;
-  height: 240px;
+  height: 280px; /* Scaled for taller machine */
   cursor: pointer;
 }
 
@@ -208,7 +212,7 @@ header p {
   bottom: 50px;
   left: -2px;
   width: 8px;
-  height: 140px;
+  height: 180px; /* Taller stick */
   background: var(--secondary);
   border: 2px solid var(--foreground);
   transform-origin: bottom center;

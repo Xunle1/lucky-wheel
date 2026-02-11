@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDisplay = document.getElementById('result-display');
     const resultText = document.getElementById('result-text');
     
-    let itemHeight = 200; 
+    let itemHeight = 240; 
     const REPEAT_COUNT = 150; // Increased for longer duration
     
     // 1. Populate List
