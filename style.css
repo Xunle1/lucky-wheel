@@ -104,7 +104,7 @@ header p {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 8px 8px 0px var(--shadow-color);
-  width: 300px;
+  width: 320px; /* Slightly wider for longer text */
   position: relative;
 }
 
@@ -119,7 +119,7 @@ header p {
 
 /* The Spinner Window */
 .spinner-window {
-  height: 120px;
+  height: 140px; /* Increased height for multiline */
   background: white;
   overflow: hidden;
   position: relative;
@@ -132,15 +132,35 @@ header p {
 }
 
 .spinner-item {
-  height: 120px;
+  height: 140px; /* Must match window height */
   display: flex;
+  flex-direction: column; /* Stack title, recipe, desc */
   justify-content: center;
   align-items: center;
-  font-size: 2.5rem;
-  color: var(--foreground);
-  text-transform: uppercase;
   text-align: center;
   line-height: 1.2;
+  padding: 0 10px;
+  border-bottom: 1px dashed var(--muted);
+}
+
+/* Drink specific styles */
+.drink-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary);
+  margin-bottom: 5px;
+}
+
+.drink-recipe {
+  font-size: 1.2rem;
+  color: var(--foreground);
+  margin-bottom: 5px;
+}
+
+.drink-desc {
+  font-size: 1.0rem;
+  color: var(--muted-foreground);
+  font-style: italic;
 }
 
 /* Pixel Reflection / Glare */
@@ -164,7 +184,7 @@ header p {
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 10;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 /* Details on the machine */
@@ -215,40 +235,22 @@ header p {
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* The knob */
+/* The knob - now nested inside stick */
 .lever-knob {
   position: absolute;
-  top: -20px; /* Relative to stick top via transform logic in JS or just simple CSS here */
-  left: -11px; /* Center on stick (8px width) -> (30-8)/2 ... wait. Knob is 30px. Stick is 8px. */
-  /* Actually, let's place knob inside stick or relative to container */
+  top: -15px; /* Offset from top of stick */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%);
   width: 30px;
   height: 30px;
   background: var(--destructive);
   border-radius: 50%;
   border: 2px solid var(--foreground);
   box-shadow: inset -4px -4px 0px rgba(0,0,0,0.2);
-  
-  /* Positioning the knob at the top of the stick */
-  transform: translateY(40px); /* Initial position */
-  transition: transform 0.5s;
 }
 
 /* Lever Pull Animation Classes */
 .lever-container.pulled .lever-stick {
-  transform: rotate(180deg);
-  transition: transform 0.3s ease-in;
-}
-
-/* Since knob is separate in DOM, we might need a better structure for pure CSS rotation or just animate stick and knob follows if nested. 
-   Let's adjust structure for simpler animation: Stick contains Knob? 
-   No, let's keep separate but use the stick's transform to move knob if possible.
-   Easier: Just simple CSS animation on the container or handle in JS.
-   Let's refine CSS for "pulled" state.
-*/
-
-.lever-container.pulled .lever-stick {
-   transform: scaleY(-1); /* Flip down? No, rotate around bottom */
-   /* rotate(150deg) looks like pulling down */
    transform: rotate(45deg); 
 }
 
@@ -258,9 +260,11 @@ header p {
   color: var(--background);
   padding: 10px 20px;
   border: 4px solid var(--primary);
-  font-size: 2rem;
+  font-size: 1.5rem; /* Slightly smaller for long text */
   box-shadow: 4px 4px 0px var(--shadow-color);
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-width: 80%;
+  text-align: center;
 }
 
 .result-box.hidden {
@@ -273,6 +277,11 @@ header p {
 }
 
 .winner-pulse {
-  color: var(--destructive);
-  text-shadow: 2px 2px 0px var(--foreground);
+  /* Only pulse the container, or maybe specific text later */
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.02); }
 }

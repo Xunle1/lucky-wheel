@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDisplay = document.getElementById('result-display');
     const resultText = document.getElementById('result-text');
     
-    const ITEM_HEIGHT = 120; // Must match CSS
+    const ITEM_HEIGHT = 140; // Updated Height for new content
     const REPEAT_COUNT = 50; 
     
     // 1. Populate List
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullList.forEach(drink => {
         const el = document.createElement('div');
         el.className = 'spinner-item';
-        el.textContent = drink;
+        el.innerHTML = drink; // Use innerHTML to parse the HTML strings
         spinnerList.appendChild(el);
     });
 
@@ -125,10 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function animateLever() {
-        // Simple CSS class toggle for animation
-        // We'll define .pulled in CSS to rotate the stick
-        // Actually, let's just animate via style directly for control or class
-        // Let's use a class that triggers a keyframe or transition
+        // Lever Animation
         leverStick.style.transformOrigin = "bottom center";
         leverStick.style.transition = "transform 0.2s ease-in";
         leverStick.style.transform = "rotate(45deg)"; // Pull down
@@ -202,7 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
              spinnerList.scrollTop = winnerIndex * ITEM_HEIGHT;
              
              // Show result box
-             resultText.textContent = items[winnerIndex].textContent;
+             // Use innerHTML to show formatted text in result box too? 
+             // Or just "YOU WON: [Title]"?
+             // Let's just copy the content.
+             resultText.innerHTML = items[winnerIndex].innerHTML;
              resultDisplay.classList.remove('hidden');
         }
         
