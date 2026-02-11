@@ -80,8 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDisplay = document.getElementById('result-display');
     const resultText = document.getElementById('result-text');
     
-    const ITEM_HEIGHT = 160; // Increased to 160px for better fit
-    const REPEAT_COUNT = 100; // More items for longer spin illusion
+    // We will calculate this dynamically to be precise
+    let itemHeight = 160; 
+    const REPEAT_COUNT = 100; 
     
     // 1. Populate List
     let fullList = [];
@@ -99,6 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         el.innerHTML = drink; 
         spinnerList.appendChild(el);
     });
+
+    // Calculate actual height after rendering
+    // Wait for a frame or force layout
+    setTimeout(() => {
+        const firstItem = spinnerList.querySelector('.spinner-item');
+        if (firstItem) {
+            itemHeight = firstItem.getBoundingClientRect().height;
+            console.log("Calculated Item Height:", itemHeight);
+        }
+    }, 100);
 
     // 2. State
     let isSpinning = false;
@@ -137,16 +148,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const items = document.querySelectorAll('.spinner-item');
         items.forEach(i => i.classList.remove('winner-pulse'));
 
-        // Pick a winner deep in the list
-        // Since we use transform, we just move DOWN (negative Y)
+        // Re-calculate height just in case (e.g. window resize)
+        const firstItem = spinnerList.querySelector('.spinner-item');
+        if (firstItem) itemHeight = firstItem.getBoundingClientRect().height;
+
         const minIndex = Math.floor(fullList.length / 2);
         const maxIndex = fullList.length - 10;
         const winnerIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
         
         // Calculate target position (negative value to move up)
-        const targetTranslateY = -(winnerIndex * ITEM_HEIGHT);
+        // Ensure integer pixel values to avoid blurring
+        const targetTranslateY = -Math.round(winnerIndex * itemHeight);
         
-        // Reset visually to 0 (or close to 0 if we want to loop seamlessly, but reset is fine)
+        // Reset visually to 0
         spinnerList.style.transition = 'none';
         spinnerList.style.transform = 'translateY(0px)';
         
@@ -163,14 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // EaseOutCubic
             const ease = 1 - Math.pow(1 - progress, 3);
             
-            // We want to go from 0 to targetTranslateY
             const currentTranslateY = ease * targetTranslateY;
             spinnerList.style.transform = `translateY(${currentTranslateY}px)`;
             
             // Audio Tick logic
-            // currentTranslateY is negative. 
-            // Index = abs(currentTranslateY) / HEIGHT
-            const currentItemIndex = Math.floor(Math.abs(currentTranslateY) / ITEM_HEIGHT);
+            const currentItemIndex = Math.floor(Math.abs(currentTranslateY) / itemHeight);
             if (animate.lastIndex !== currentItemIndex) {
                 playTickSound();
                 animate.lastIndex = currentItemIndex;
@@ -190,17 +201,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function finishSpin(winnerIndex, finalPosition) {
         isSpinning = false;
         
-        // Ensure exact alignment
+        // Snap to exact pixel
         spinnerList.style.transform = `translateY(${finalPosition}px)`;
         
         const items = document.querySelectorAll('.spinner-item');
+        
+        // Double check which item is actually visible
+        // Since we transformed by (winnerIndex * height), item[winnerIndex] should be at top.
+        // Let's verify.
         if (items[winnerIndex]) {
             items[winnerIndex].classList.add('winner-pulse');
-            
-             // Populate result box with clean text (stripping HTML for title if needed, or just reusing innerHTML)
-             // Using innerHTML is safest for the styled content.
              resultText.innerHTML = items[winnerIndex].innerHTML;
              resultDisplay.classList.remove('hidden');
+        } else {
+            console.error("Winner index out of bounds:", winnerIndex);
         }
         
         playWinSound();

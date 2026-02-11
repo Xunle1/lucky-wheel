@@ -130,10 +130,13 @@ header p {
   position: relative;
   top: 0;
   will-change: transform;
+  display: flex;
+  flex-direction: column;
 }
 
 .spinner-item {
   height: 160px; /* Must match window height */
+  flex-shrink: 0;
   display: flex;
   flex-direction: column; /* Stack title, recipe, desc */
   justify-content: center;
@@ -142,6 +145,7 @@ header p {
   line-height: 1.2;
   padding: 0 10px;
   border-bottom: 1px dashed var(--muted);
+  box-sizing: border-box;
 }
 
 /* Drink specific styles */
