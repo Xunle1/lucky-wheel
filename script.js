@@ -133,7 +133,8 @@ function playLeverSound() {
 
 const STORAGE_KEY = 'lucky-wheel.leaderboard.v1';
 const HIDDEN_PRIZE_ID = 'hidden-prize';
-const HIDDEN_PRIZE_WEIGHT = 2.5;
+const HIDDEN_PRIZE_NAME = '隐藏奖品';
+const HIDDEN_PRIZE_WEIGHT = 30 / 7;
 
 const SIDEBAR_PLACEHOLDER_IMAGE = `data:image/svg+xml,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
@@ -175,15 +176,32 @@ function getDrinkCatalog() {
     ];
 }
 
-function getDrinkWeight(drink) {
-    if (!drink || typeof drink !== 'object') return 1;
-    return drink.id === HIDDEN_PRIZE_ID ? HIDDEN_PRIZE_WEIGHT : 1;
+function hasUserWonHiddenPrize(user) {
+    if (!user || !Array.isArray(user.history)) return false;
+
+    return user.history.some((record) => {
+        if (!record || typeof record !== 'object') return false;
+
+        const drinkId = String(record.drinkId || '').trim();
+        if (drinkId === HIDDEN_PRIZE_ID) return true;
+
+        const drinkName = String(record.drinkName || '').trim();
+        return drinkName === HIDDEN_PRIZE_NAME;
+    });
 }
 
-function pickWeightedDrinkIndex(catalog) {
+function getDrinkWeight(drink, hiddenPrizeLocked) {
+    if (!drink || typeof drink !== 'object') return 1;
+    if (drink.id !== HIDDEN_PRIZE_ID) return 1;
+    if (hiddenPrizeLocked) return 0;
+    return HIDDEN_PRIZE_WEIGHT;
+}
+
+function pickWeightedDrinkIndex(catalog, currentUser) {
     if (!Array.isArray(catalog) || !catalog.length) return 0;
 
-    const weights = catalog.map((drink) => Math.max(getDrinkWeight(drink), 0));
+    const hiddenPrizeLocked = hasUserWonHiddenPrize(currentUser);
+    const weights = catalog.map((drink) => Math.max(getDrinkWeight(drink, hiddenPrizeLocked), 0));
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
 
     if (totalWeight <= 0) {
@@ -327,6 +345,7 @@ function loadAppState() {
                         ? user.history
                             .filter((record) => record && typeof record === 'object')
                             .map((record) => ({
+                                drinkId: String(record.drinkId || ''),
                                 drinkName: String(record.drinkName || ''),
                                 timeISO: String(record.timeISO || '')
                             }))
@@ -408,6 +427,7 @@ function buildLeaderboardExportData(state) {
             history: Array.isArray(user.history)
                 ? user.history.map((record, recordIndex) => ({
                     index: recordIndex + 1,
+                    drinkId: record.drinkId || '',
                     drinkName: record.drinkName || '未知酒品',
                     timeISO: record.timeISO || '',
                     timeChina: formatChinaTime(record.timeISO)
@@ -1094,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLeaderboard(leaderboardScrollTrack, state);
     }
 
-    function addSpinRecord(drinkName) {
+    function addSpinRecord(drinkData) {
         const currentUser = getCurrentUser(state);
         if (!currentUser) return;
 
@@ -1103,7 +1123,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser.history = [];
         }
 
+        const drinkName = (drinkData && typeof drinkData === 'object')
+            ? String(drinkData.name || '未知酒品')
+            : String(drinkData || '未知酒品');
+
+        const drinkId = (drinkData && typeof drinkData === 'object' && drinkData.id)
+            ? String(drinkData.id)
+            : '';
+
         currentUser.history.unshift({
+            drinkId,
             drinkName: drinkName || '未知酒品',
             timeISO: new Date().toISOString()
         });
@@ -1133,7 +1162,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const minIndex = Math.floor(fullList.length * 0.7);
         const maxIndex = fullList.length - 20;
-        const selectedDrinkIndex = pickWeightedDrinkIndex(drinkCatalog);
+        const currentUser = getCurrentUser(state);
+        const selectedDrinkIndex = pickWeightedDrinkIndex(drinkCatalog, currentUser);
         const winnerIndex = pickWinnerIndexForDrinkInRange(
             minIndex,
             maxIndex,
@@ -1193,11 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showDrinkInResultModal(winnerData);
 
-        if (typeof winnerData === 'object') {
-            addSpinRecord(winnerData.name);
-        } else {
-            addSpinRecord('未知酒品');
-        }
+        addSpinRecord(winnerData);
 
         setTimeout(() => {
             openModal(resultModal);
