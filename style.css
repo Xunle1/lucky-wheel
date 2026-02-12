@@ -18,8 +18,8 @@
   --border: oklch(0.6209 0.1801 348.1385);
   --input: oklch(0.9189 0 0);
   --ring: oklch(0.7002 0.1597 350.7532);
-  /* Use DotGothic16 for Chinese support */
-  --font-pixel: 'DotGothic16', sans-serif;
+  /* Use ZCOOL KuaiLe for playful Chinese support, fallback to DotGothic16 */
+  --font-pixel: 'ZCOOL KuaiLe', 'DotGothic16', cursive, sans-serif;
   /* Hard shadow color */
   --shadow-color: rgba(0, 0, 0, 0.2);
 }
@@ -42,7 +42,7 @@ body {
   overflow: hidden;
   image-rendering: pixelated;
   /* Disable smoothing for sharper pixels */
-  -webkit-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
