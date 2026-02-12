@@ -5,25 +5,25 @@
 }
 
 :root {
-  --background: oklch(0.9399 0.0203 345.6985);
-  --foreground: oklch(0.4712 0 0);
-  --card: oklch(0.9498 0.0500 86.8891);
-  --card-foreground: oklch(0.4712 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.4712 0 0);
-  --primary: oklch(0.6209 0.1801 348.1385);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.8095 0.0694 198.1863);
-  --secondary-foreground: oklch(0.3211 0 0);
-  --muted: oklch(0.8800 0.0504 212.0952);
-  --muted-foreground: oklch(0.5795 0 0);
-  --accent: oklch(0.9195 0.0801 87.6670);
-  --accent-foreground: oklch(0.3211 0 0);
-  --destructive: oklch(0.7091 0.1697 21.9551);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.6209 0.1801 348.1385);
-  --input: oklch(0.9189 0 0);
-  --ring: oklch(0.7002 0.1597 350.7532);
+  --background: #0f1020;
+  --foreground: #eaeaea;
+  --card: rgba(18, 8, 40, 0.82);
+  --card-foreground: #eaeaea;
+  --popover: rgba(15, 16, 32, 0.96);
+  --popover-foreground: #eaeaea;
+  --primary: #ff4da6;
+  --primary-foreground: #fff6fb;
+  --secondary: #2b3f6b;
+  --secondary-foreground: #d8e7ff;
+  --muted: #24304f;
+  --muted-foreground: #a0a0a0;
+  --accent: #61e8ff;
+  --accent-foreground: #09141f;
+  --destructive: #ff5d7a;
+  --destructive-foreground: #fff6fb;
+  --border: #ff4da6;
+  --input: rgba(8, 12, 28, 0.9);
+  --ring: #61e8ff;
   /* Use Ark Pixel for pure pixel style */
   --font-pixel: 'ArkPixel', 'DotGothic16', sans-serif;
   /* Hard shadow color */
@@ -39,7 +39,15 @@
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(180deg, oklch(0.975 0.02 350) 0%, oklch(0.9 0.04 320) 100%);
+  background-color: #1a1a2e;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 77, 166, 0.32), transparent 40%),
+    radial-gradient(circle at 80% 75%, rgba(97, 232, 255, 0.26), transparent 42%),
+    linear-gradient(135deg, #1a1a2e 0%, #2b1055 35%, #3a1c71 65%, #16213e 100%),
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: auto, auto, 400% 400%, 8px 8px, 8px 8px;
+  background-position: center, center, 0% 50%, 0 0, 0 0;
   color: var(--foreground);
   display: flex;
   justify-content: center;
@@ -50,6 +58,22 @@ body {
   /* Disable smoothing for sharper pixels */
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
+  animation: gradientMove 20s ease infinite;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    rgba(0, 0, 0, 0.08) 1px,
+    rgba(0, 0, 0, 0.08) 2px
+  );
+  pointer-events: none;
+  z-index: 999;
 }
 
 .main-container {
@@ -318,6 +342,12 @@ header p {
 @keyframes pulse {
     from { transform: scale(1); }
     to { transform: scale(1.05); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: center, center, 0% 50%, 0 0, 0 0; }
+  50% { background-position: center, center, 100% 50%, 0 0, 0 0; }
+  100% { background-position: center, center, 0% 50%, 0 0, 0 0; }
 }
 
 .modal-overlay {
