@@ -613,8 +613,11 @@ function renderDrinkSidebar(sidebarTrack, drinkCatalog) {
             thumb.src = SIDEBAR_PLACEHOLDER_IMAGE;
         };
         thumb.alt = `${drink.name || '酒品'}图片`;
+        thumb.width = 64;
+        thumb.height = 64;
         thumb.loading = 'lazy';
         thumb.decoding = 'async';
+        thumb.fetchPriority = 'low';
 
         const name = document.createElement('p');
         name.className = 'sidebar-drink-name';
@@ -661,8 +664,11 @@ function renderLeaderboard(leaderboardTrack, state) {
         thumb.className = 'leaderboard-thumb';
         thumb.src = user.photo || SIDEBAR_PLACEHOLDER_IMAGE;
         thumb.alt = `${user.name}头像`;
+        thumb.width = 64;
+        thumb.height = 64;
         thumb.loading = 'lazy';
         thumb.decoding = 'async';
+        thumb.fetchPriority = 'low';
         thumb.onerror = () => {
             thumb.onerror = null;
             thumb.src = SIDEBAR_PLACEHOLDER_IMAGE;
