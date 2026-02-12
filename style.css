@@ -70,6 +70,7 @@ header h1 {
   /* Hard pixel shadow */
   text-shadow: 4px 4px 0px var(--shadow-color);
   letter-spacing: 4px;
+  padding-left: 4px; /* Balance letter-spacing for perfect centering */
   line-height: 1;
 }
 
@@ -78,6 +79,8 @@ header p {
   margin-top: 10px;
   color: var(--muted-foreground);
   text-transform: uppercase;
+  letter-spacing: 2px;
+  padding-left: 2px; /* Balance letter-spacing */
 }
 
 /* Slot Machine Structure */

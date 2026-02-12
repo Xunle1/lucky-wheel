@@ -101,7 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fullList.forEach(drink => {
         const el = document.createElement('div');
         el.className = 'spinner-item';
-        el.textContent = drink.name || drink;
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'drink-title';
+        titleEl.textContent = drink.name || drink;
+        
+        el.appendChild(titleEl);
         spinnerList.appendChild(el);
     });
 
