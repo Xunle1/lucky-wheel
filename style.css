@@ -163,6 +163,14 @@ body.modal-open .app-layout {
   gap: 8px;
 }
 
+.leaderboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .pixel-mini-btn {
   background: var(--secondary);
   color: var(--secondary-foreground);

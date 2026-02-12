@@ -254,6 +254,50 @@ function formatChinaTime(isoString) {
     return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 }
 
+function getChinaTimestampParts(date = new Date()) {
+    const parts = chinaTimeFormatter.formatToParts(date).reduce((acc, part) => {
+        acc[part.type] = part.value;
+        return acc;
+    }, {});
+
+    return {
+        year: parts.year || '0000',
+        month: parts.month || '00',
+        day: parts.day || '00',
+        hour: parts.hour || '00',
+        minute: parts.minute || '00',
+        second: parts.second || '00'
+    };
+}
+
+function getChinaTimestampForFilename(date = new Date()) {
+    const parts = getChinaTimestampParts(date);
+    return `${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}${parts.second}`;
+}
+
+function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function sanitizeName(name) {
     return String(name || '').trim().replace(/\s+/g, ' ').slice(0, 24);
 }
@@ -342,6 +386,188 @@ function getSortedUsers(state) {
         if (b.spinCount !== a.spinCount) return b.spinCount - a.spinCount;
         return a.name.localeCompare(b.name, 'zh-CN');
     });
+}
+
+function buildLeaderboardExportData(state) {
+    const sortedUsers = getSortedUsers(state);
+    const now = new Date();
+    const nowISO = now.toISOString();
+
+    return {
+        exportedAtISO: nowISO,
+        exportedAtChinaTime: formatChinaTime(nowISO),
+        timezone: 'Asia/Shanghai',
+        totalUsers: sortedUsers.length,
+        leaderboard: sortedUsers.map((user, index) => ({
+            rank: index + 1,
+            userId: user.id,
+            name: user.name,
+            spinCount: Number(user.spinCount || 0),
+            isCurrentUser: user.id === state.currentUserId,
+            photo: user.photo || '',
+            history: Array.isArray(user.history)
+                ? user.history.map((record, recordIndex) => ({
+                    index: recordIndex + 1,
+                    drinkName: record.drinkName || '未知酒品',
+                    timeISO: record.timeISO || '',
+                    timeChina: formatChinaTime(record.timeISO)
+                }))
+                : []
+        }))
+    };
+}
+
+function buildLeaderboardExportHtml(exportData) {
+    const users = Array.isArray(exportData.leaderboard) ? exportData.leaderboard : [];
+
+    const userSections = users.map((user) => {
+        const safeName = escapeHtml(user.name || '未知用户');
+        const safePhoto = escapeHtml(user.photo || SIDEBAR_PLACEHOLDER_IMAGE);
+        const safeCount = Number(user.spinCount || 0);
+        const history = Array.isArray(user.history) ? user.history : [];
+
+        const historyRows = history.length
+            ? history.map((record) => `
+                <tr>
+                    <td>${escapeHtml(record.drinkName || '未知酒品')}</td>
+                    <td>${escapeHtml(record.timeChina || '--')}</td>
+                </tr>
+            `).join('')
+            : `
+                <tr>
+                    <td colspan="2" class="empty">暂无拉杆记录</td>
+                </tr>
+            `;
+
+        return `
+            <section class="user-card">
+                <div class="user-head">
+                    <img class="user-photo" src="${safePhoto}" alt="${safeName}头像">
+                    <div>
+                        <div class="user-title">#${user.rank} ${safeName}</div>
+                        <div class="user-meta">拉杆 ${safeCount} 次</div>
+                    </div>
+                </div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>酒名</th>
+                            <th>时间（中国时区）</th>
+                        </tr>
+                    </thead>
+                    <tbody>${historyRows}</tbody>
+                </table>
+            </section>
+        `;
+    }).join('');
+
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拉杆榜导出</title>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #0b1225;
+            color: #f8f9ff;
+            line-height: 1.5;
+            padding: 24px;
+        }
+        .wrap {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #151f3f;
+            border: 1px solid #35467d;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            margin: 0 0 6px;
+            font-size: 20px;
+        }
+        .header p {
+            margin: 0;
+            opacity: 0.86;
+            font-size: 14px;
+        }
+        .cards {
+            display: grid;
+            gap: 12px;
+        }
+        .user-card {
+            background: #151f3f;
+            border: 1px solid #35467d;
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .user-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .user-photo {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #4b60a8;
+            background: #091129;
+        }
+        .user-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .user-meta {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .history-table th,
+        .history-table td {
+            border: 1px solid #32416f;
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            background: #0f1733;
+        }
+        .history-table th {
+            background: #1a2852;
+            font-weight: 600;
+        }
+        .history-table .empty {
+            text-align: center;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <h1>拉杆榜导出记录</h1>
+            <p>导出时间：${escapeHtml(exportData.exportedAtChinaTime || '--')}（Asia/Shanghai）</p>
+            <p>用户数：${Number(exportData.totalUsers || 0)}</p>
+        </div>
+        <div class="cards">${userSections || '<p>暂无记录</p>'}</div>
+    </div>
+</body>
+</html>`;
 }
 
 function openModal(modal) {
@@ -594,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const capturePhotoBtn = document.getElementById('capturePhotoBtn');
     const retakePhotoBtn = document.getElementById('retakePhotoBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const switchUserBtn = document.getElementById('switchUserBtn');
+    const exportLeaderboardBtn = document.getElementById('exportLeaderboardBtn');
 
     const historyModal = document.getElementById('historyModal');
     const historyCloseBtn = document.getElementById('historyCloseBtn');
@@ -1045,10 +1271,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    switchUserBtn.addEventListener('click', async () => {
-        const currentUser = getCurrentUser(state);
-        await openProfileModal(currentUser ? currentUser.name : '');
-    });
+    if (exportLeaderboardBtn) {
+        exportLeaderboardBtn.addEventListener('click', () => {
+            const exportData = buildLeaderboardExportData(state);
+            const filename = `leaderboard-export-${getChinaTimestampForFilename()}.html`;
+            const htmlReport = buildLeaderboardExportHtml(exportData);
+            downloadTextFile(filename, htmlReport, 'text/html;charset=utf-8');
+
+            const originalText = exportLeaderboardBtn.textContent;
+            exportLeaderboardBtn.textContent = '已导出';
+            exportLeaderboardBtn.disabled = true;
+
+            setTimeout(() => {
+                exportLeaderboardBtn.textContent = originalText || '导出记录';
+                exportLeaderboardBtn.disabled = false;
+            }, 1200);
+        });
+    }
 
     sidebarScrollTrack.addEventListener('click', (event) => {
         if (isSpinning) return;
