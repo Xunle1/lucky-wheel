@@ -1,5 +1,6 @@
 // Initialize Audio Context
 let audioCtx;
+const COUNTDOWN_SOUND_VOLUME_MULTIPLIER = 2.0;
 
 function initAudio() {
     if (!audioCtx) {
@@ -129,6 +130,55 @@ function playLeverSound() {
 
     osc.start();
     osc.stop(audioCtx.currentTime + 0.2);
+}
+
+function playCountdownBeep(remainingSeconds) {
+    if (!audioCtx) return;
+
+    const safeRemaining = Number(remainingSeconds || 0);
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    // Final second gets a slightly higher pitch so users feel the capture is near.
+    const baseFreq = safeRemaining <= 1 ? 880 : 620;
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.92, now + 0.07);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(Math.min(1, 0.16 * COUNTDOWN_SOUND_VOLUME_MULTIPLIER), now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.09);
+}
+
+function playCaptureReadyBeep() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    const notes = [1046.50, 1318.51];
+    notes.forEach((freq, index) => {
+        const startTime = now + index * 0.06;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.05, startTime + 0.08);
+
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(Math.min(1, 0.18 * COUNTDOWN_SOUND_VOLUME_MULTIPLIER), startTime + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.09);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 0.09);
+    });
 }
 
 const STORAGE_KEY = 'lucky-wheel.leaderboard.v1';
@@ -1009,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function startPhotoCountdownAndCapture() {
+    async function startPhotoCountdownAndCapture() {
         if (isCapturingPhoto || isCountdownRunning) return Promise.resolve(false);
 
         if (!cameraStream) {
@@ -1017,11 +1067,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return Promise.resolve(false);
         }
 
+        initAudio();
+        if (audioCtx && audioCtx.state === 'suspended') {
+            try {
+                await audioCtx.resume();
+            } catch (error) {
+                // Ignore resume failures and keep visual countdown working.
+            }
+        }
+
         isCountdownRunning = true;
         capturePhotoBtn.disabled = true;
 
         let remainingSeconds = PHOTO_COUNTDOWN_SECONDS;
         cameraStatus.textContent = `倒计时 ${remainingSeconds} 秒...`;
+        playCountdownBeep(remainingSeconds);
 
         return new Promise((resolve) => {
             countdownResolve = resolve;
@@ -1030,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 remainingSeconds -= 1;
                 if (remainingSeconds > 0) {
                     cameraStatus.textContent = `倒计时 ${remainingSeconds} 秒...`;
+                    playCountdownBeep(remainingSeconds);
                 }
             }, 1000);
 
@@ -1041,6 +1102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 countdownTimeoutId = null;
                 isCountdownRunning = false;
                 countdownResolve = null;
+                playCaptureReadyBeep();
 
                 const captured = await capturePhoto();
                 if (!captured && cameraStream) {
