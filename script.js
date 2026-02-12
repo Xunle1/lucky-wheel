@@ -101,6 +101,21 @@ function getDrinkCatalog() {
     ];
 }
 
+function resolveDrinkImageSrc(drink) {
+    if (!drink || typeof drink !== 'object' || !drink.image) {
+        return SIDEBAR_PLACEHOLDER_IMAGE;
+    }
+
+    const image = String(drink.image).trim();
+    if (!image) return SIDEBAR_PLACEHOLDER_IMAGE;
+
+    if (image.startsWith('data:') || image.startsWith('http://') || image.startsWith('https://') || image.startsWith('/')) {
+        return image;
+    }
+
+    return encodeURI(image);
+}
+
 function renderSidebarList(sidebarTrack, drinkCatalog) {
     if (!sidebarTrack) return;
 
@@ -114,8 +129,12 @@ function renderSidebarList(sidebarTrack, drinkCatalog) {
 
         const thumb = document.createElement('img');
         thumb.className = 'sidebar-thumb';
-        thumb.src = SIDEBAR_PLACEHOLDER_IMAGE;
-        thumb.alt = `${drink.name || '酒品'}占位图`;
+        thumb.src = resolveDrinkImageSrc(drink);
+        thumb.onerror = () => {
+            thumb.onerror = null;
+            thumb.src = SIDEBAR_PLACEHOLDER_IMAGE;
+        };
+        thumb.alt = `${drink.name || '酒品'}图片`;
         thumb.loading = 'lazy';
         thumb.decoding = 'async';
 
@@ -144,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const resultModal = document.getElementById('resultModal');
     const resultName = document.getElementById('resultName');
+    const resultImage = document.getElementById('resultImage');
     const resultRecipe = document.getElementById('resultRecipe');
     const closeBtn = document.querySelector('.close-btn');
     const confirmBtn = document.getElementById('confirmBtn');
@@ -286,6 +306,16 @@ document.addEventListener('DOMContentLoaded', () => {
         playWinSound();
 
         const winnerData = fullList[winnerIndex];
+        const modalImageSource = (typeof winnerData === 'object') ? winnerData : null;
+        if (resultImage) {
+            resultImage.src = resolveDrinkImageSrc(modalImageSource);
+            resultImage.alt = `${(modalImageSource && modalImageSource.name) || '酒品'}图片`;
+            resultImage.onerror = () => {
+                resultImage.onerror = null;
+                resultImage.src = SIDEBAR_PLACEHOLDER_IMAGE;
+            };
+        }
+
         if (typeof winnerData === 'object') {
             resultName.textContent = `《${winnerData.name}》`;
             resultRecipe.innerHTML = winnerData.recipe || '';
