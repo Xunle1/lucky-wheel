@@ -1,5 +1,6 @@
 // Initialize Audio Context
 let audioCtx;
+const SPIN_TICK_SOUND_VOLUME_MULTIPLIER = 1;
 const COUNTDOWN_SOUND_VOLUME_MULTIPLIER = 2.0;
 
 function initAudio() {
@@ -18,8 +19,8 @@ function playTickSound() {
     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
 
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    gain.gain.setValueAtTime(Math.min(1, 0.055 * SPIN_TICK_SOUND_VOLUME_MULTIPLIER), audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(Math.min(1, 0.006 * SPIN_TICK_SOUND_VOLUME_MULTIPLIER), audioCtx.currentTime + 0.05);
 
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -184,7 +185,7 @@ function playCaptureReadyBeep() {
 const STORAGE_KEY = 'lucky-wheel.leaderboard.v1';
 const HIDDEN_PRIZE_ID = 'hidden-prize';
 const HIDDEN_PRIZE_NAME = '隐藏奖品';
-const HIDDEN_PRIZE_WEIGHT = 30 / 7;
+const HIDDEN_PRIZE_WEIGHT = 16 / 3;
 
 const SIDEBAR_PLACEHOLDER_IMAGE = `data:image/svg+xml,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
