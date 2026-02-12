@@ -99,16 +99,17 @@
                 <h3 class="modal-title">拉杆前先登记</h3>
                 <label class="form-label" for="playerNameInput">你的名字</label>
                 <input id="playerNameInput" class="pixel-input" type="text" maxlength="24" placeholder="请输入昵称">
-                <p id="cameraStatus" class="camera-status">请允许摄像头权限并拍一张照片。</p>
+                <p id="cameraStatus" class="camera-status">请输入名字。新用户需拍照，老用户可直接确认。</p>
                 <div class="camera-frame">
                     <video id="cameraPreview" class="camera-preview" autoplay playsinline muted></video>
                     <img id="capturedPreview" class="camera-captured hidden" alt="拍照预览">
                     <canvas id="captureCanvas" class="hidden"></canvas>
                 </div>
                 <div class="camera-actions">
+                    <button id="startCameraBtn" class="pixel-btn" type="button">开启摄像头</button>
                     <button id="capturePhotoBtn" class="pixel-btn" type="button">拍照</button>
                     <button id="retakePhotoBtn" class="pixel-btn" type="button">重拍</button>
-                    <button id="saveProfileBtn" class="pixel-btn" type="button">确认并开始</button>
+                    <button id="saveProfileBtn" class="pixel-btn" type="button">确认用户</button>
                 </div>
             </div>
         </div>

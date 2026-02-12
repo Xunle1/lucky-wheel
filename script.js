@@ -206,6 +206,10 @@ function getCurrentUser(state) {
     return getUserById(state, state.currentUserId);
 }
 
+function findUserByName(state, name) {
+    return state.users.find((user) => user.name === name) || null;
+}
+
 function createUser(state, name, photo) {
     const newUser = {
         id: `u_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
@@ -218,17 +222,6 @@ function createUser(state, name, photo) {
     state.users.push(newUser);
     state.currentUserId = newUser.id;
     return newUser;
-}
-
-function upsertUserByName(state, name, photo) {
-    const existing = state.users.find((user) => user.name === name);
-    if (existing) {
-        existing.photo = photo;
-        state.currentUserId = existing.id;
-        return existing;
-    }
-
-    return createUser(state, name, photo);
 }
 
 function getSortedUsers(state) {
@@ -422,6 +415,36 @@ function renderUserHistory(recordsContainer, user) {
     recordsContainer.appendChild(fragment);
 }
 
+function waitForVideoFrame(videoEl, timeoutMs = 2000) {
+    if (!videoEl) return Promise.resolve(false);
+
+    if (videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0) {
+        return Promise.resolve(true);
+    }
+
+    return new Promise((resolve) => {
+        let done = false;
+        const finish = (ok) => {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            videoEl.removeEventListener('loadeddata', onReady);
+            videoEl.removeEventListener('canplay', onReady);
+            resolve(ok);
+        };
+
+        const onReady = () => {
+            if (videoEl.videoWidth > 0 && videoEl.videoHeight > 0) {
+                finish(true);
+            }
+        };
+
+        const timer = setTimeout(() => finish(false), timeoutMs);
+        videoEl.addEventListener('loadeddata', onReady);
+        videoEl.addEventListener('canplay', onReady);
+    });
+}
+
 // Logic
 document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
@@ -445,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraPreview = document.getElementById('cameraPreview');
     const capturedPreview = document.getElementById('capturedPreview');
     const captureCanvas = document.getElementById('captureCanvas');
+    const startCameraBtn = document.getElementById('startCameraBtn');
     const capturePhotoBtn = document.getElementById('capturePhotoBtn');
     const retakePhotoBtn = document.getElementById('retakePhotoBtn');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
@@ -464,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const drinkCatalog = getDrinkCatalog();
 
     let isSpinning = false;
-    let pendingSpinAfterProfile = false;
+    let isUserConfirmedForNextSpin = false;
     let cameraStream = null;
     let capturedPhotoData = '';
 
@@ -541,12 +565,33 @@ document.addEventListener('DOMContentLoaded', () => {
         retakePhotoBtn.disabled = true;
     }
 
+    function updateProfileStatusHint() {
+        const name = sanitizeName(playerNameInput.value);
+
+        if (!name) {
+            cameraStatus.textContent = '请输入名字。新用户需拍照，老用户可直接确认。';
+            return;
+        }
+
+        const existingUser = findUserByName(state, name);
+        if (existingUser) {
+            cameraStatus.textContent = `已识别用户「${existingUser.name}」，无需拍照可直接确认。`;
+        } else if (capturedPhotoData) {
+            cameraStatus.textContent = '新用户拍照完成，点击“确认用户”保存。';
+        } else {
+            cameraStatus.textContent = '新用户需要先拍照后再确认。';
+        }
+    }
+
     async function openProfileModal(prefillName = '') {
+        isUserConfirmedForNextSpin = false;
         playerNameInput.value = prefillName;
         resetCapturedPreview();
+        stopCamera();
         openModal(profileModal);
-        await startCamera();
-        capturePhotoBtn.disabled = false;
+        capturePhotoBtn.disabled = true;
+        startCameraBtn.disabled = false;
+        updateProfileStatusHint();
     }
 
     function closeProfileModal() {
@@ -694,11 +739,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (profileModal.classList.contains('show')) return;
         if (historyModal.classList.contains('show')) return;
 
-        if (!getCurrentUser(state)) {
-            pendingSpinAfterProfile = true;
-            await openProfileModal('');
+        if (!isUserConfirmedForNextSpin) {
+            const currentUser = getCurrentUser(state);
+            await openProfileModal(currentUser ? currentUser.name : '');
             return;
         }
+        isUserConfirmedForNextSpin = false;
 
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') {
@@ -740,31 +786,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     switchUserBtn.addEventListener('click', async () => {
-        pendingSpinAfterProfile = false;
         const currentUser = getCurrentUser(state);
         await openProfileModal(currentUser ? currentUser.name : '');
     });
 
     profileCloseBtn.addEventListener('click', () => {
-        pendingSpinAfterProfile = false;
         closeProfileModal();
     });
 
     profileModal.addEventListener('click', (event) => {
         if (event.target === profileModal) {
-            pendingSpinAfterProfile = false;
             closeProfileModal();
         }
     });
 
-    capturePhotoBtn.addEventListener('click', async () => {
-        if (!cameraStream) {
-            const ready = await startCamera();
-            if (!ready) return;
+    startCameraBtn.addEventListener('click', async () => {
+        const ready = await startCamera();
+        if (!ready) {
+            return;
         }
 
-        const width = cameraPreview.videoWidth || 640;
-        const height = cameraPreview.videoHeight || 480;
+        cameraPreview.classList.remove('hidden');
+        capturedPreview.classList.add('hidden');
+        capturePhotoBtn.disabled = false;
+        cameraStatus.textContent = '摄像头已开启，请点击“拍照”。';
+    });
+
+    capturePhotoBtn.addEventListener('click', async () => {
+        if (!cameraStream) {
+            cameraStatus.textContent = '请先点击“开启摄像头”。';
+            return;
+        }
+
+        const frameReady = await waitForVideoFrame(cameraPreview);
+        if (!frameReady) {
+            cameraStatus.textContent = '摄像头画面还没准备好，请再试一次。';
+            return;
+        }
+
+        const width = cameraPreview.videoWidth;
+        const height = cameraPreview.videoHeight;
 
         if (!width || !height) {
             cameraStatus.textContent = '还没获取到画面，请稍后再拍。';
@@ -781,23 +842,41 @@ document.addEventListener('DOMContentLoaded', () => {
         capturedPreview.src = capturedPhotoData;
         capturedPreview.classList.remove('hidden');
         cameraPreview.classList.add('hidden');
+        capturePhotoBtn.disabled = true;
         retakePhotoBtn.disabled = false;
-        cameraStatus.textContent = '拍照完成，请点击“确认并开始”。';
+        updateProfileStatusHint();
 
         stopCamera();
     });
 
-    retakePhotoBtn.addEventListener('click', async () => {
+    retakePhotoBtn.addEventListener('click', () => {
         resetCapturedPreview();
-        await startCamera();
-        capturePhotoBtn.disabled = false;
+        stopCamera();
+        capturePhotoBtn.disabled = true;
+        startCameraBtn.disabled = false;
+        updateProfileStatusHint();
     });
 
-    saveProfileBtn.addEventListener('click', async () => {
+    playerNameInput.addEventListener('input', updateProfileStatusHint);
+
+    saveProfileBtn.addEventListener('click', () => {
         const name = sanitizeName(playerNameInput.value);
 
         if (!name) {
             cameraStatus.textContent = '请先填写名字。';
+            return;
+        }
+
+        const existingUser = findUserByName(state, name);
+
+        if (existingUser) {
+            state.currentUserId = existingUser.id;
+            if (capturedPhotoData) {
+                existingUser.photo = capturedPhotoData;
+            }
+            persistState();
+            isUserConfirmedForNextSpin = true;
+            closeProfileModal();
             return;
         }
 
@@ -806,16 +885,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        upsertUserByName(state, name, capturedPhotoData);
+        createUser(state, name, capturedPhotoData);
         persistState();
+        isUserConfirmedForNextSpin = true;
         closeProfileModal();
-
-        if (pendingSpinAfterProfile) {
-            pendingSpinAfterProfile = false;
-            setTimeout(() => {
-                triggerSpin();
-            }, 120);
-        }
     });
 
     leaderboardScrollTrack.addEventListener('click', (event) => {
