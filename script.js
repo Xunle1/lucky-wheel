@@ -296,8 +296,9 @@ function renderLeaderboard(leaderboardTrack, state) {
 
     const sortedUsers = getSortedUsers(state);
 
+    leaderboardTrack.innerHTML = '';
+
     if (!sortedUsers.length) {
-        leaderboardTrack.innerHTML = '';
         const empty = document.createElement('div');
         empty.className = 'leaderboard-item leaderboard-empty';
         empty.textContent = '暂无拉杆记录';
@@ -306,10 +307,7 @@ function renderLeaderboard(leaderboardTrack, state) {
         return;
     }
 
-    const loopList = sortedUsers.length > 1 ? sortedUsers.concat(sortedUsers) : sortedUsers;
-    const fragment = document.createDocumentFragment();
-
-    loopList.forEach((user) => {
+    const buildLeaderboardItem = (user, rank) => {
         const item = document.createElement('div');
         item.className = 'leaderboard-item';
         item.dataset.userId = user.id;
@@ -332,6 +330,21 @@ function renderLeaderboard(leaderboardTrack, state) {
         const info = document.createElement('div');
         info.className = 'leaderboard-info';
 
+        const rankBadge = document.createElement('span');
+        rankBadge.className = 'leaderboard-rank';
+        if (rank === 1) {
+            rankBadge.classList.add('rank-1');
+            rankBadge.textContent = '🏆';
+        } else if (rank === 2) {
+            rankBadge.classList.add('rank-2');
+            rankBadge.textContent = '🥈';
+        } else if (rank === 3) {
+            rankBadge.classList.add('rank-3');
+            rankBadge.textContent = '🥉';
+        } else {
+            rankBadge.textContent = String(rank);
+        }
+
         const name = document.createElement('p');
         name.className = 'leaderboard-name';
         name.textContent = user.name;
@@ -340,19 +353,38 @@ function renderLeaderboard(leaderboardTrack, state) {
         count.className = 'leaderboard-count';
         count.textContent = `拉杆 ${user.spinCount} 次`;
 
+        info.appendChild(rankBadge);
         info.appendChild(name);
         info.appendChild(count);
         item.appendChild(thumb);
         item.appendChild(info);
-        fragment.appendChild(item);
+        return item;
+    };
+
+    const singleListFragment = document.createDocumentFragment();
+    sortedUsers.forEach((user, index) => {
+        singleListFragment.appendChild(buildLeaderboardItem(user, index + 1));
     });
+    leaderboardTrack.appendChild(singleListFragment);
 
-    leaderboardTrack.innerHTML = '';
-    leaderboardTrack.appendChild(fragment);
+    const viewport = leaderboardTrack.parentElement;
+    const singleListHeight = leaderboardTrack.scrollHeight;
+    const viewportHeight = viewport ? viewport.clientHeight : 0;
+    const needsLoop = sortedUsers.length > 1 && viewportHeight > 0 && singleListHeight > viewportHeight + 8;
 
-    const durationSeconds = Math.max(14, sortedUsers.length * 2.4);
-    leaderboardTrack.style.setProperty('--leaderboard-duration', `${durationSeconds}s`);
-    leaderboardTrack.classList.toggle('static-track', sortedUsers.length <= 1);
+    if (needsLoop) {
+        const loopFragment = document.createDocumentFragment();
+        sortedUsers.forEach((user, index) => {
+            loopFragment.appendChild(buildLeaderboardItem(user, index + 1));
+        });
+        leaderboardTrack.appendChild(loopFragment);
+
+        const durationSeconds = Math.max(14, sortedUsers.length * 2.4);
+        leaderboardTrack.style.setProperty('--leaderboard-duration', `${durationSeconds}s`);
+        leaderboardTrack.classList.remove('static-track');
+    } else {
+        leaderboardTrack.classList.add('static-track');
+    }
 }
 
 function renderUserHistory(recordsContainer, user) {
@@ -798,6 +830,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target === historyModal) {
             closeHistoryModal();
         }
+    });
+
+    window.addEventListener('resize', () => {
+        renderLeaderboard(leaderboardScrollTrack, state);
     });
 
 });
