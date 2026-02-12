@@ -253,9 +253,10 @@ function renderDrinkSidebar(sidebarTrack, drinkCatalog) {
     const loopList = sourceList.concat(sourceList);
     const fragment = document.createDocumentFragment();
 
-    loopList.forEach((drink) => {
+    loopList.forEach((drink, index) => {
         const item = document.createElement('div');
         item.className = 'sidebar-item';
+        item.dataset.drinkIndex = String(index % sourceList.length);
 
         const thumb = document.createElement('img');
         thumb.className = 'sidebar-thumb';
@@ -707,7 +708,21 @@ document.addEventListener('DOMContentLoaded', () => {
         playWinSound();
 
         const winnerData = fullList[winnerIndex];
-        const modalImageSource = (typeof winnerData === 'object') ? winnerData : null;
+        showDrinkInResultModal(winnerData);
+
+        if (typeof winnerData === 'object') {
+            addSpinRecord(winnerData.name);
+        } else {
+            addSpinRecord('未知酒品');
+        }
+
+        setTimeout(() => {
+            openModal(resultModal);
+        }, 500);
+    }
+
+    function showDrinkInResultModal(drinkData) {
+        const modalImageSource = (typeof drinkData === 'object') ? drinkData : null;
 
         if (resultImage) {
             resultImage.src = resolveDrinkImageSrc(modalImageSource);
@@ -718,19 +733,13 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        if (typeof winnerData === 'object') {
-            resultName.textContent = `《${winnerData.name}》`;
-            resultRecipe.innerHTML = winnerData.recipe || '';
-            addSpinRecord(winnerData.name);
+        if (typeof drinkData === 'object') {
+            resultName.textContent = `《${drinkData.name}》`;
+            resultRecipe.innerHTML = drinkData.recipe || '';
         } else {
             resultName.textContent = 'Winner!';
             resultRecipe.textContent = '';
-            addSpinRecord('未知酒品');
         }
-
-        setTimeout(() => {
-            openModal(resultModal);
-        }, 500);
     }
 
     async function triggerSpin() {
@@ -788,6 +797,22 @@ document.addEventListener('DOMContentLoaded', () => {
     switchUserBtn.addEventListener('click', async () => {
         const currentUser = getCurrentUser(state);
         await openProfileModal(currentUser ? currentUser.name : '');
+    });
+
+    sidebarScrollTrack.addEventListener('click', (event) => {
+        if (isSpinning) return;
+        if (profileModal.classList.contains('show')) return;
+        if (historyModal.classList.contains('show')) return;
+
+        const item = event.target.closest('.sidebar-item[data-drink-index]');
+        if (!item) return;
+
+        const drinkIndex = Number(item.dataset.drinkIndex);
+        const drinkData = drinkCatalog[drinkIndex];
+        if (!drinkData) return;
+
+        showDrinkInResultModal(drinkData);
+        openModal(resultModal);
     });
 
     profileCloseBtn.addEventListener('click', () => {

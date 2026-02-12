@@ -299,6 +299,10 @@ body::after {
   border: 2px solid var(--muted);
 }
 
+.drink-sidebar .sidebar-item {
+  cursor: pointer;
+}
+
 .sidebar-thumb {
   width: 64px;
   height: 64px;
