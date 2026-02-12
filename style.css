@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'ArkPixel';
+  src: url('fonts/ark-pixel-12px-monospaced-zh_cn.ttf.woff2') format('woff2');
+  font-display: swap;
+}
+
 :root {
   --background: oklch(0.9399 0.0203 345.6985);
   --foreground: oklch(0.4712 0 0);
@@ -18,8 +24,8 @@
   --border: oklch(0.6209 0.1801 348.1385);
   --input: oklch(0.9189 0 0);
   --ring: oklch(0.7002 0.1597 350.7532);
-  /* Use ZCOOL KuaiLe for playful Chinese support, fallback to DotGothic16 */
-  --font-pixel: 'ZCOOL KuaiLe', 'DotGothic16', cursive, sans-serif;
+  /* Use Ark Pixel for pure pixel style */
+  --font-pixel: 'ArkPixel', 'DotGothic16', sans-serif;
   /* Hard shadow color */
   --shadow-color: rgba(0, 0, 0, 0.2);
 }
@@ -42,7 +48,7 @@ body {
   overflow: hidden;
   image-rendering: pixelated;
   /* Disable smoothing for sharper pixels */
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
 }
 
