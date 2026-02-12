@@ -76,8 +76,15 @@ function playLeverSound() {
 document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
     const leverContainer = document.getElementById('leverContainer'); 
-    const leverStick = document.querySelector('.lever-stick'); 
+    const leverStick = document.querySelector('.lever-stick');
     
+    const resultModal = document.getElementById('resultModal');
+    const resultName = document.getElementById('resultName');
+    const resultQuote = document.getElementById('resultQuote');
+    const resultRecipe = document.getElementById('resultRecipe');
+    const closeBtn = document.querySelector('.close-btn');
+    const confirmBtn = document.getElementById('confirmBtn');
+
     let itemHeight = 240; 
     const REPEAT_COUNT = 150; // Increased for longer duration
     
@@ -94,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fullList.forEach(drink => {
         const el = document.createElement('div');
         el.className = 'spinner-item';
-        el.innerHTML = drink; 
+        el.textContent = drink.name || drink;
         spinnerList.appendChild(el);
     });
 
@@ -196,5 +203,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         playWinSound();
+
+        const winnerData = fullList[winnerIndex];
+        if (typeof winnerData === 'object') {
+            resultName.textContent = `《${winnerData.name}》`;
+            resultQuote.textContent = winnerData.quote;
+            resultRecipe.innerHTML = winnerData.recipe;
+        } else {
+            resultName.textContent = 'Winner!';
+            resultQuote.textContent = winnerData;
+            resultRecipe.textContent = '';
+        }
+
+        setTimeout(() => {
+            resultModal.classList.remove('hidden');
+            void resultModal.offsetWidth;
+            resultModal.classList.add('show');
+        }, 500);
     }
+
+    function closeModal() {
+        resultModal.classList.remove('show');
+        setTimeout(() => {
+            resultModal.classList.add('hidden');
+        }, 300);
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    confirmBtn.addEventListener('click', closeModal);
+    
+    resultModal.addEventListener('click', (e) => {
+        if (e.target === resultModal) {
+            closeModal();
+        }
+    });
 });
