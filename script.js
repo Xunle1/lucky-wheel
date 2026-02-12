@@ -236,14 +236,22 @@ function openModal(modal) {
     modal.classList.remove('hidden');
     void modal.offsetWidth;
     modal.classList.add('show');
+    syncModalOpenState();
 }
 
 function closeModal(modal) {
     if (!modal) return;
     modal.classList.remove('show');
+    syncModalOpenState();
     setTimeout(() => {
         modal.classList.add('hidden');
+        syncModalOpenState();
     }, 300);
+}
+
+function syncModalOpenState() {
+    const hasVisibleModal = Boolean(document.querySelector('.modal-overlay.show'));
+    document.body.classList.toggle('modal-open', hasVisibleModal);
 }
 
 function renderDrinkSidebar(sidebarTrack, drinkCatalog) {
@@ -492,6 +500,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isUserConfirmedForNextSpin = false;
     let cameraStream = null;
     let capturedPhotoData = '';
+    let isCapturingPhoto = false;
+    let isCountdownRunning = false;
+    let countdownIntervalId = null;
+    let countdownTimeoutId = null;
+    let countdownResolve = null;
+    const PHOTO_COUNTDOWN_SECONDS = 3;
 
     renderDrinkSidebar(sidebarScrollTrack, drinkCatalog);
     renderLeaderboard(leaderboardScrollTrack, state);
@@ -520,7 +534,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 100);
 
+    function stopCaptureCountdown() {
+        if (countdownIntervalId) {
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+        }
+
+        if (countdownTimeoutId) {
+            clearTimeout(countdownTimeoutId);
+            countdownTimeoutId = null;
+        }
+
+        if (typeof countdownResolve === 'function') {
+            countdownResolve(false);
+            countdownResolve = null;
+        }
+
+        isCountdownRunning = false;
+    }
+
     function stopCamera() {
+        stopCaptureCountdown();
+
         if (cameraStream) {
             cameraStream.getTracks().forEach((track) => track.stop());
             cameraStream = null;
@@ -539,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            cameraStatus.textContent = '摄像头已开启，请点击“拍照”。';
+            cameraStatus.textContent = '正在开启摄像头...';
             cameraStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'user',
@@ -556,6 +591,99 @@ document.addEventListener('DOMContentLoaded', () => {
             cameraStatus.textContent = '摄像头权限被拒绝，请在浏览器地址栏允许访问后重试。';
             return false;
         }
+    }
+
+    async function capturePhoto() {
+        if (isCapturingPhoto || isCountdownRunning) return false;
+
+        if (!cameraStream) {
+            cameraStatus.textContent = '请先点击“开启摄像头”。';
+            return false;
+        }
+
+        isCapturingPhoto = true;
+
+        try {
+            const frameReady = await waitForVideoFrame(cameraPreview);
+            if (!frameReady) {
+                cameraStatus.textContent = '摄像头画面还没准备好，请再试一次。';
+                return false;
+            }
+
+            const width = cameraPreview.videoWidth;
+            const height = cameraPreview.videoHeight;
+
+            if (!width || !height) {
+                cameraStatus.textContent = '还没获取到画面，请稍后再拍。';
+                return false;
+            }
+
+            captureCanvas.width = width;
+            captureCanvas.height = height;
+
+            const ctx = captureCanvas.getContext('2d');
+            if (!ctx) {
+                cameraStatus.textContent = '拍照失败，请重试。';
+                return false;
+            }
+
+            ctx.drawImage(cameraPreview, 0, 0, width, height);
+
+            capturedPhotoData = captureCanvas.toDataURL('image/jpeg', 0.85);
+            capturedPreview.src = capturedPhotoData;
+            capturedPreview.classList.remove('hidden');
+            cameraPreview.classList.add('hidden');
+            capturePhotoBtn.disabled = true;
+            retakePhotoBtn.disabled = false;
+            updateProfileStatusHint();
+
+            stopCamera();
+            return true;
+        } finally {
+            isCapturingPhoto = false;
+        }
+    }
+
+    function startPhotoCountdownAndCapture() {
+        if (isCapturingPhoto || isCountdownRunning) return Promise.resolve(false);
+
+        if (!cameraStream) {
+            cameraStatus.textContent = '请先点击“开启摄像头”。';
+            return Promise.resolve(false);
+        }
+
+        isCountdownRunning = true;
+        capturePhotoBtn.disabled = true;
+
+        let remainingSeconds = PHOTO_COUNTDOWN_SECONDS;
+        cameraStatus.textContent = `倒计时 ${remainingSeconds} 秒...`;
+
+        return new Promise((resolve) => {
+            countdownResolve = resolve;
+
+            countdownIntervalId = setInterval(() => {
+                remainingSeconds -= 1;
+                if (remainingSeconds > 0) {
+                    cameraStatus.textContent = `倒计时 ${remainingSeconds} 秒...`;
+                }
+            }, 1000);
+
+            countdownTimeoutId = setTimeout(async () => {
+                if (countdownIntervalId) {
+                    clearInterval(countdownIntervalId);
+                    countdownIntervalId = null;
+                }
+                countdownTimeoutId = null;
+                isCountdownRunning = false;
+                countdownResolve = null;
+
+                const captured = await capturePhoto();
+                if (!captured && cameraStream) {
+                    capturePhotoBtn.disabled = false;
+                }
+                resolve(captured);
+            }, PHOTO_COUNTDOWN_SECONDS * 1000);
+        });
     }
 
     function resetCapturedPreview() {
@@ -834,44 +962,11 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraPreview.classList.remove('hidden');
         capturedPreview.classList.add('hidden');
         capturePhotoBtn.disabled = false;
-        cameraStatus.textContent = '摄像头已开启，请点击“拍照”。';
+        cameraStatus.textContent = `摄像头已开启，点击“拍照”后将倒计时 ${PHOTO_COUNTDOWN_SECONDS} 秒自动拍照。`;
     });
 
     capturePhotoBtn.addEventListener('click', async () => {
-        if (!cameraStream) {
-            cameraStatus.textContent = '请先点击“开启摄像头”。';
-            return;
-        }
-
-        const frameReady = await waitForVideoFrame(cameraPreview);
-        if (!frameReady) {
-            cameraStatus.textContent = '摄像头画面还没准备好，请再试一次。';
-            return;
-        }
-
-        const width = cameraPreview.videoWidth;
-        const height = cameraPreview.videoHeight;
-
-        if (!width || !height) {
-            cameraStatus.textContent = '还没获取到画面，请稍后再拍。';
-            return;
-        }
-
-        captureCanvas.width = width;
-        captureCanvas.height = height;
-
-        const ctx = captureCanvas.getContext('2d');
-        ctx.drawImage(cameraPreview, 0, 0, width, height);
-
-        capturedPhotoData = captureCanvas.toDataURL('image/jpeg', 0.85);
-        capturedPreview.src = capturedPhotoData;
-        capturedPreview.classList.remove('hidden');
-        cameraPreview.classList.add('hidden');
-        capturePhotoBtn.disabled = true;
-        retakePhotoBtn.disabled = false;
-        updateProfileStatusHint();
-
-        stopCamera();
+        await startPhotoCountdownAndCapture();
     });
 
     retakePhotoBtn.addEventListener('click', () => {
