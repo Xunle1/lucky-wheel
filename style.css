@@ -316,3 +316,121 @@ header p {
     from { transform: scale(1); }
     to { transform: scale(1.05); }
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: var(--background);
+    border: 4px solid var(--primary);
+    box-shadow: 8px 8px 0 var(--shadow-color);
+    padding: 20px;
+    max-width: 80%;
+    width: 400px;
+    position: relative;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.close-btn {
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 0.5;
+    color: var(--muted-foreground);
+}
+
+.close-btn:hover {
+    color: var(--primary);
+}
+
+.result-name {
+    font-size: 2rem;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 0 var(--shadow-color);
+}
+
+.result-quote {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: var(--foreground);
+    text-align: center;
+}
+
+.result-divider {
+    height: 2px;
+    background: var(--muted);
+    margin: 15px 0;
+    position: relative;
+}
+
+.result-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: var(--secondary);
+    border: 2px solid var(--border);
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.result-recipe {
+    font-size: 1rem;
+    color: var(--muted-foreground);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.modal-footer {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.pixel-btn {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: 4px solid var(--border);
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--shadow-color);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.pixel-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--shadow-color);
+}

@@ -1,23 +1,33 @@
-// 酒单配置
-// 格式：HTML 字符串，支持 <br> 换行
+// 结构化数据
 const DRINKS = [
-    `<div class="drink-title">《简单版本》</div>
-     <div class="drink-recipe">金酒 30ml · 汤力水 150ml<br>冰满杯 · 柠檬片</div>
-     <div class="drink-desc">清爽、稳定、看起来很好推进。</div>`,
-
-    `<div class="drink-title">《昨天就差不多了》</div>
-     <div class="drink-recipe">朗姆 30ml · 可乐 150ml<br>柠檬汁 10ml</div>
-     <div class="drink-desc">甜甜的，听起来充满希望。</div>`,
-
-    `<div class="drink-title">《快速迭代》</div>
-     <div class="drink-recipe">龙舌兰 30ml · 紫苏红柚糖浆 15ml<br>柠檬汁 15ml · 苏打水</div>
-     <div class="drink-desc">有点野，有点想法。</div>`,
-
-    `<div class="drink-title">《重新梳理逻辑》</div>
-     <div class="drink-recipe">威士忌 30ml · 苏打水 150ml<br>冰满杯</div>
-     <div class="drink-desc">成熟担当型选手。</div>`,
-
-    `<div class="drink-title">《再对齐一下》</div>
-     <div class="drink-recipe">威士忌 45ml · 柠檬汁 20ml<br>紫苏红柚糖浆 15ml · 摇</div>
-     <div class="drink-desc">需要认真“对齐”的那杯。</div>`
+    {
+        id: 'simple',
+        name: '下个版本优化',
+        quote: '这个需求听起来确实不复杂，我们先做个简单版本上线看看效果，不行的话下个版本再慢慢优化',
+        recipe: '金酒 30ml · 汤力水 150ml<br>冰满杯 · 柠檬片'
+    },
+    {
+        id: 'deadline',
+        name: '最晚明天',
+        quote: '这个其实昨天就差不多了，今天再改一点点细节，最晚明天下班前一定可以给到你',
+        recipe: '朗姆 30ml · 可乐 150ml<br>柠檬汁 10ml'
+    },
+    {
+        id: 'iteration',
+        name: '快速迭代',
+        quote: '这个方向未必是最优解，但我们可以大胆试错，快速迭代一下',
+        recipe: '龙舌兰 30ml · 紫苏红柚糖浆 15ml<br>柠檬汁 15ml · 苏打水'
+    },
+    {
+        id: 'logic',
+        name: '重新梳理',
+        quote: '这个事情先别定结论，我们喝一口再重新梳理一下逻辑',
+        recipe: '威士忌 30ml · 苏打水 150ml<br>冰满杯'
+    },
+    {
+        id: 'align',
+        name: '快速对齐',
+        quote: '这个细节我觉得还可以再对齐一下，不然上线之后大家理解得可能不太一样',
+        recipe: '威士忌 45ml · 柠檬汁 20ml<br>紫苏红柚糖浆 15ml · 摇'
+    }
 ];
