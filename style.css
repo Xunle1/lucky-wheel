@@ -381,14 +381,6 @@ header p {
     text-shadow: 2px 2px 0 var(--shadow-color);
 }
 
-.result-quote {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    color: var(--foreground);
-    text-align: center;
-}
-
 .result-divider {
     height: 2px;
     background: var(--muted);

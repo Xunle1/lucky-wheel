@@ -80,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const resultModal = document.getElementById('resultModal');
     const resultName = document.getElementById('resultName');
-    const resultQuote = document.getElementById('resultQuote');
     const resultRecipe = document.getElementById('resultRecipe');
     const closeBtn = document.querySelector('.close-btn');
     const confirmBtn = document.getElementById('confirmBtn');
@@ -212,11 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const winnerData = fullList[winnerIndex];
         if (typeof winnerData === 'object') {
             resultName.textContent = `《${winnerData.name}》`;
-            resultQuote.textContent = winnerData.quote;
             resultRecipe.innerHTML = winnerData.recipe;
         } else {
             resultName.textContent = 'Winner!';
-            resultQuote.textContent = winnerData;
             resultRecipe.textContent = '';
         }
 
