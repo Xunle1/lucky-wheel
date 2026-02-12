@@ -11,58 +11,68 @@
 </head>
 <body>
 
-    <div class="main-container">
-        <!-- Header -->
-        <header>
-            <h1>微醺实验室</h1>
-            <p>今晚不加班</p>
-        </header>
+    <div class="app-layout">
+        <aside class="drink-sidebar" aria-label="酒单滚动列表">
+            <h2 class="sidebar-title">今日酒单</h2>
+            <div class="sidebar-scroll-window">
+                <div class="sidebar-scroll-track" id="sidebarScrollTrack">
+                    <!-- Sidebar items will be injected by JS -->
+                </div>
+            </div>
+        </aside>
 
-        <!-- Slot Machine Component -->
-        <div class="slot-machine-container">
-            <!-- The Machine Body -->
-            <div class="machine-body">
-                <div class="screen-border">
-                    <div class="spinner-window">
-                        <div class="spinner-list" id="spinnerList">
-                            <!-- Items will be injected by JS -->
+        <div class="main-container">
+            <!-- Header -->
+            <header>
+                <h1>微醺实验室</h1>
+                <p>今晚不加班</p>
+            </header>
+
+            <!-- Slot Machine Component -->
+            <div class="slot-machine-container">
+                <!-- The Machine Body -->
+                <div class="machine-body">
+                    <div class="screen-border">
+                        <div class="spinner-window">
+                            <div class="spinner-list" id="spinnerList">
+                                <!-- Items will be injected by JS -->
+                            </div>
+                            <div class="selection-line"></div>
+                            <div class="pixel-reflection"></div>
                         </div>
-                        <div class="selection-line"></div>
-                        <div class="pixel-reflection"></div>
+                    </div>
+                    
+                    <div class="machine-details">
+                        <div class="detail-stripe"></div>
+                        <div class="detail-stripe"></div>
                     </div>
                 </div>
-                
-                <div class="machine-details">
-                    <div class="detail-stripe"></div>
-                    <div class="detail-stripe"></div>
+
+                <!-- The Lever -->
+                <div class="lever-container" id="leverContainer">
+                    <div class="lever-base"></div>
+                    <div class="lever-stick">
+                        <div class="lever-knob"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- The Lever -->
-            <div class="lever-container" id="leverContainer">
-                <div class="lever-base"></div>
-                <div class="lever-stick">
-                    <div class="lever-knob"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="resultModal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="close-btn">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <div id="resultName" class="result-name"></div>
-                    <div class="result-divider"></div>
-                    <div id="resultRecipe" class="result-recipe"></div>
-                </div>
-                <div class="modal-footer">
-                    <button id="confirmBtn" class="pixel-btn">再来一杯</button>
+            <div id="resultModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span class="close-btn">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div id="resultName" class="result-name"></div>
+                        <div class="result-divider"></div>
+                        <div id="resultRecipe" class="result-recipe"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="confirmBtn" class="pixel-btn">再来一杯</button>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Scripts -->

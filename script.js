@@ -72,9 +72,73 @@ function playLeverSound() {
     osc.stop(audioCtx.currentTime + 0.2);
 }
 
+const SIDEBAR_PLACEHOLDER_IMAGE = `data:image/svg+xml,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4da6"/>
+      <stop offset="100%" stop-color="#61e8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="72" height="72" fill="#14172a"/>
+  <rect x="4" y="4" width="64" height="64" fill="url(#g)" opacity="0.28"/>
+  <rect x="10" y="10" width="52" height="52" fill="none" stroke="#eaeaea" stroke-width="3"/>
+  <text x="36" y="42" text-anchor="middle" font-size="14" fill="#eaeaea" font-family="monospace">DRINK</text>
+</svg>
+`)}`;
+
+function getDrinkCatalog() {
+    if (typeof DRINKS !== 'undefined' && Array.isArray(DRINKS) && DRINKS.length) {
+        return DRINKS;
+    }
+
+    return [
+        {
+            id: 'missing-config',
+            name: 'Error: No Config',
+            recipe: 'Check config.js'
+        }
+    ];
+}
+
+function renderSidebarList(sidebarTrack, drinkCatalog) {
+    if (!sidebarTrack) return;
+
+    const sourceList = drinkCatalog.length ? drinkCatalog : [{ name: '酒单待配置' }];
+    const loopList = sourceList.concat(sourceList);
+    const fragment = document.createDocumentFragment();
+
+    loopList.forEach((drink) => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+
+        const thumb = document.createElement('img');
+        thumb.className = 'sidebar-thumb';
+        thumb.src = SIDEBAR_PLACEHOLDER_IMAGE;
+        thumb.alt = `${drink.name || '酒品'}占位图`;
+        thumb.loading = 'lazy';
+        thumb.decoding = 'async';
+
+        const name = document.createElement('p');
+        name.className = 'sidebar-drink-name';
+        name.textContent = drink.name || String(drink);
+
+        item.appendChild(thumb);
+        item.appendChild(name);
+        fragment.appendChild(item);
+    });
+
+    sidebarTrack.innerHTML = '';
+    sidebarTrack.appendChild(fragment);
+
+    const durationSeconds = Math.max(18, sourceList.length * 2.8);
+    sidebarTrack.style.setProperty('--sidebar-duration', `${durationSeconds}s`);
+}
+
 // Logic
 document.addEventListener('DOMContentLoaded', () => {
     const spinnerList = document.getElementById('spinnerList');
+    const sidebarScrollTrack = document.getElementById('sidebarScrollTrack');
     const leverContainer = document.getElementById('leverContainer'); 
     const leverStick = document.querySelector('.lever-stick');
     
@@ -86,15 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let itemHeight = 240; 
     const REPEAT_COUNT = 150; // Increased for longer duration
+    const drinkCatalog = getDrinkCatalog();
+
+    renderSidebarList(sidebarScrollTrack, drinkCatalog);
     
     // 1. Populate List
     let fullList = [];
-    if (typeof DRINKS !== 'undefined') {
-        for(let i=0; i<REPEAT_COUNT; i++) {
-            fullList = fullList.concat(DRINKS);
-        }
-    } else {
-        fullList = ["Error: No Config", "Check config.js"];
+    for (let i = 0; i < REPEAT_COUNT; i++) {
+        fullList = fullList.concat(drinkCatalog);
     }
     
     fullList.forEach(drink => {
@@ -119,21 +182,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. State
     let isSpinning = false;
-    
-    leverContainer.addEventListener('click', async () => {
+
+    async function triggerSpin() {
         if (isSpinning) return;
-        
+        if (!resultModal.classList.contains('hidden')) return;
+
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') {
             await audioCtx.resume();
         }
-        
+
         playLeverSound();
         animateLever();
-        
+
         setTimeout(() => {
             startSpin();
         }, 300);
+    }
+    
+    leverContainer.addEventListener('click', triggerSpin);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.repeat) return;
+
+        const isShortcut = event.code === 'Space' || event.code === 'Enter';
+        if (!isShortcut) return;
+        if (!resultModal.classList.contains('hidden')) return;
+
+        event.preventDefault();
+        triggerSpin();
     });
 
     function animateLever() {
@@ -211,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const winnerData = fullList[winnerIndex];
         if (typeof winnerData === 'object') {
             resultName.textContent = `《${winnerData.name}》`;
-            resultRecipe.innerHTML = winnerData.recipe;
+            resultRecipe.innerHTML = winnerData.recipe || '';
         } else {
             resultName.textContent = 'Winner!';
             resultRecipe.textContent = '';

@@ -37,6 +37,7 @@
 }
 
 body {
+  position: relative;
   margin: 0;
   padding: 0;
   background-color: #1a1a2e;
@@ -46,19 +47,36 @@ body {
     linear-gradient(135deg, #1a1a2e 0%, #2b1055 35%, #3a1c71 65%, #16213e 100%),
     linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: auto, auto, 400% 400%, 8px 8px, 8px 8px;
-  background-position: center, center, 0% 50%, 0 0, 0 0;
+  background-size: 120% 120%, 120% 120%, 300% 300%, 8px 8px, 8px 8px;
+  background-position: 15% 20%, 80% 75%, 0% 50%, 0 0, 0 0;
   color: var(--foreground);
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   image-rendering: pixelated;
   /* Disable smoothing for sharper pixels */
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
-  animation: gradientMove 20s ease infinite;
+  animation: neonBackgroundMove 4.5s linear infinite alternate;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -12%;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  filter: blur(10px) saturate(120%);
+  background:
+    radial-gradient(circle at 20% 25%, rgba(255, 77, 166, 0.45), transparent 40%),
+    radial-gradient(circle at 78% 35%, rgba(97, 232, 255, 0.38), transparent 42%),
+    radial-gradient(circle at 50% 82%, rgba(180, 110, 255, 0.30), transparent 45%);
+  opacity: 0.72;
+  animation: neonDrift 3.2s linear infinite alternate;
 }
 
 body::after {
@@ -76,11 +94,93 @@ body::after {
   z-index: 999;
 }
 
+.app-layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
 .main-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 30px;
+}
+
+.drink-sidebar {
+  position: absolute;
+  left: max(8px, calc(50% - 620px));
+  top: 50%;
+  transform: translateY(-50%);
+  width: 250px;
+  height: min(84vh, 620px);
+  padding: 14px 12px 12px;
+  background-color: rgba(8, 12, 28, 0.84);
+  border: 4px solid var(--border);
+  box-shadow: 8px 8px 0 var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 2;
+}
+
+.sidebar-title {
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.sidebar-scroll-window {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 3px solid var(--secondary-foreground);
+  background: rgba(15, 16, 32, 0.92);
+  padding: 8px;
+}
+
+.sidebar-scroll-track {
+  --sidebar-duration: 28s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: sidebarLoop var(--sidebar-duration) linear infinite;
+  will-change: transform;
+}
+
+.sidebar-item {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(97, 232, 255, 0.08);
+  border: 2px solid var(--muted);
+}
+
+.sidebar-thumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: cover;
+  image-rendering: pixelated;
+  border: 2px solid var(--secondary-foreground);
+  background: #14172a;
+}
+
+.sidebar-drink-name {
+  margin: 0;
+  line-height: 1.35;
+  color: var(--foreground);
+  font-size: 1rem;
+  word-break: break-all;
 }
 
 header {
@@ -344,10 +444,27 @@ header p {
     to { transform: scale(1.05); }
 }
 
-@keyframes gradientMove {
-  0% { background-position: center, center, 0% 50%, 0 0, 0 0; }
-  50% { background-position: center, center, 100% 50%, 0 0, 0 0; }
-  100% { background-position: center, center, 0% 50%, 0 0, 0 0; }
+@keyframes sidebarLoop {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
+@keyframes neonBackgroundMove {
+  0% {
+    background-position: 10% 15%, 85% 80%, 0% 50%, 0 0, 0 0;
+  }
+  50% {
+    background-position: 35% 45%, 55% 55%, 100% 50%, 0 0, 0 0;
+  }
+  100% {
+    background-position: 50% 20%, 40% 85%, 0% 50%, 0 0, 0 0;
+  }
+}
+
+@keyframes neonDrift {
+  0% { transform: translate3d(-3%, -2%, 0) scale(1.03); }
+  50% { transform: translate3d(4%, 2.5%, 0) scale(1.09); }
+  100% { transform: translate3d(-4%, 3%, 0) scale(1.05); }
 }
 
 .modal-overlay {
@@ -460,4 +577,87 @@ header p {
 .pixel-btn:active {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0 var(--shadow-color);
+}
+
+@media (max-width: 1080px) {
+  body {
+    padding: 10px;
+  }
+
+  .drink-sidebar {
+    left: 10px;
+    width: 190px;
+    height: min(76vh, 560px);
+  }
+
+  .slot-machine-container {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+    padding: 12px 10px 16px;
+  }
+
+  .app-layout {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .main-container {
+    position: static;
+    transform: none;
+    gap: 18px;
+  }
+
+  .drink-sidebar {
+    position: static;
+    transform: none;
+    width: min(460px, 100%);
+    height: 220px;
+    max-height: none;
+  }
+
+  .sidebar-scroll-window {
+    min-height: 150px;
+  }
+
+  header h1 {
+    font-size: 2.2rem;
+    letter-spacing: 2px;
+    padding-left: 2px;
+  }
+
+  header p {
+    font-size: 1.1rem;
+  }
+
+  .machine-body {
+    width: min(100%, 340px);
+    padding: 14px;
+  }
+
+  .spinner-window {
+    height: 210px;
+  }
+
+  .spinner-item {
+    height: 210px;
+  }
+
+  .drink-title {
+    font-size: 1.5rem;
+  }
+
+  .modal-content {
+    min-width: 0;
+    width: min(92vw, 420px);
+  }
 }
