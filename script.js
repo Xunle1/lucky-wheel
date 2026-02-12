@@ -53,6 +53,65 @@ function playWinSound() {
     });
 }
 
+function playHiddenPrizeSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    const notes = [392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00];
+    const step = 0.14;
+
+    notes.forEach((freq, i) => {
+        const startTime = now + i * step;
+
+        const leadOsc = audioCtx.createOscillator();
+        const leadGain = audioCtx.createGain();
+        leadOsc.type = 'square';
+        leadOsc.frequency.setValueAtTime(freq, startTime);
+        leadOsc.frequency.exponentialRampToValueAtTime(freq * 1.035, startTime + step * 0.75);
+        leadGain.gain.setValueAtTime(0.0001, startTime);
+        leadGain.gain.exponentialRampToValueAtTime(0.16, startTime + 0.012);
+        leadGain.gain.exponentialRampToValueAtTime(0.0001, startTime + step);
+        leadOsc.connect(leadGain);
+        leadGain.connect(audioCtx.destination);
+        leadOsc.start(startTime);
+        leadOsc.stop(startTime + step + 0.02);
+
+        const sparkleOsc = audioCtx.createOscillator();
+        const sparkleGain = audioCtx.createGain();
+        const sparkleStart = startTime + 0.03;
+        sparkleOsc.type = 'triangle';
+        sparkleOsc.frequency.setValueAtTime(freq * 2, sparkleStart);
+        sparkleOsc.frequency.exponentialRampToValueAtTime(freq * 1.4, sparkleStart + step * 0.65);
+        sparkleGain.gain.setValueAtTime(0.0001, sparkleStart);
+        sparkleGain.gain.exponentialRampToValueAtTime(0.07, sparkleStart + 0.01);
+        sparkleGain.gain.exponentialRampToValueAtTime(0.0001, sparkleStart + step * 0.75);
+        sparkleOsc.connect(sparkleGain);
+        sparkleGain.connect(audioCtx.destination);
+        sparkleOsc.start(sparkleStart);
+        sparkleOsc.stop(sparkleStart + step * 0.8 + 0.02);
+    });
+
+    const finaleStart = now + notes.length * step;
+    [1046.50, 1567.98].forEach((freq) => {
+        const finaleOsc = audioCtx.createOscillator();
+        const finaleGain = audioCtx.createGain();
+
+        finaleOsc.type = 'sawtooth';
+        finaleOsc.frequency.setValueAtTime(freq, finaleStart);
+        finaleOsc.frequency.exponentialRampToValueAtTime(freq * 1.1, finaleStart + 0.26);
+
+        finaleGain.gain.setValueAtTime(0.0001, finaleStart);
+        finaleGain.gain.exponentialRampToValueAtTime(0.11, finaleStart + 0.02);
+        finaleGain.gain.exponentialRampToValueAtTime(0.0001, finaleStart + 0.34);
+
+        finaleOsc.connect(finaleGain);
+        finaleGain.connect(audioCtx.destination);
+
+        finaleOsc.start(finaleStart);
+        finaleOsc.stop(finaleStart + 0.36);
+    });
+}
+
 function playLeverSound() {
     if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
@@ -73,6 +132,8 @@ function playLeverSound() {
 }
 
 const STORAGE_KEY = 'lucky-wheel.leaderboard.v1';
+const HIDDEN_PRIZE_ID = 'hidden-prize';
+const HIDDEN_PRIZE_WEIGHT = 2.5;
 
 const SIDEBAR_PLACEHOLDER_IMAGE = `data:image/svg+xml,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">
@@ -112,6 +173,58 @@ function getDrinkCatalog() {
             recipe: 'Check config.js'
         }
     ];
+}
+
+function getDrinkWeight(drink) {
+    if (!drink || typeof drink !== 'object') return 1;
+    return drink.id === HIDDEN_PRIZE_ID ? HIDDEN_PRIZE_WEIGHT : 1;
+}
+
+function pickWeightedDrinkIndex(catalog) {
+    if (!Array.isArray(catalog) || !catalog.length) return 0;
+
+    const weights = catalog.map((drink) => Math.max(getDrinkWeight(drink), 0));
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+
+    if (totalWeight <= 0) {
+        return Math.floor(Math.random() * catalog.length);
+    }
+
+    let threshold = Math.random() * totalWeight;
+
+    for (let index = 0; index < weights.length; index++) {
+        threshold -= weights[index];
+        if (threshold <= 0) {
+            return index;
+        }
+    }
+
+    return weights.length - 1;
+}
+
+function pickWinnerIndexForDrinkInRange(minIndex, maxIndex, selectedDrinkIndex, catalogLength) {
+    const fallbackIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
+
+    if (!Number.isInteger(selectedDrinkIndex) || !Number.isInteger(catalogLength) || catalogLength <= 0) {
+        return fallbackIndex;
+    }
+
+    if (selectedDrinkIndex < 0 || selectedDrinkIndex >= catalogLength) {
+        return fallbackIndex;
+    }
+
+    const matchedIndices = [];
+    for (let index = minIndex; index <= maxIndex; index++) {
+        if (index % catalogLength === selectedDrinkIndex) {
+            matchedIndices.push(index);
+        }
+    }
+
+    if (!matchedIndices.length) {
+        return fallbackIndex;
+    }
+
+    return matchedIndices[Math.floor(Math.random() * matchedIndices.length)];
 }
 
 function resolveDrinkImageSrc(drink) {
@@ -788,7 +901,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const minIndex = Math.floor(fullList.length * 0.7);
         const maxIndex = fullList.length - 20;
-        const winnerIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
+        const selectedDrinkIndex = pickWeightedDrinkIndex(drinkCatalog);
+        const winnerIndex = pickWinnerIndexForDrinkInRange(
+            minIndex,
+            maxIndex,
+            selectedDrinkIndex,
+            drinkCatalog.length
+        );
         const targetTranslateY = -Math.round(winnerIndex * itemHeight);
 
         spinnerList.style.transition = 'none';
@@ -833,9 +952,13 @@ document.addEventListener('DOMContentLoaded', () => {
             items[winnerIndex].classList.add('winner-pulse');
         }
 
-        playWinSound();
-
         const winnerData = fullList[winnerIndex];
+        if (winnerData && winnerData.id === HIDDEN_PRIZE_ID) {
+            playHiddenPrizeSound();
+        } else {
+            playWinSound();
+        }
+
         showDrinkInResultModal(winnerData);
 
         if (typeof winnerData === 'object') {

@@ -69,5 +69,12 @@ const DRINKS = [
         image: '酒图/人生很复杂但这一口必须干脆.png',
         quote: '人生很复杂但这一口必须很干脆',
         recipe: 'shot<br>橙汁<br>西柚糖浆<br>伏特加<br>蓝橙力娇酒<br>Shot杯中倒橙汁，然后用吧勺倒西柚糖浆到底部，伏特加+蓝橙摇匀后，用吧勺倒在顶部'
+    },
+    {
+        id: 'hidden-prize',
+        name: '隐藏奖品',
+        image: '酒图/隐藏奖品.png',
+        quote: '隐藏奖品',
+        recipe: '恭喜抽中隐藏奖品！<br>请联系现场工作人员领取神秘奖励。'
     }
 ];
