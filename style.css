@@ -965,12 +965,76 @@ header p {
   }
 }
 
+@media (max-width: 820px) {
+  body {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100dvh;
+    align-items: flex-start;
+    padding: 12px 12px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .app-layout {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .main-container {
+    position: static;
+    transform: none;
+    gap: 20px;
+    width: min(760px, 100%);
+  }
+
+  .drink-sidebar,
+  .leaderboard-sidebar {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    width: min(760px, 100%);
+    max-height: none;
+  }
+
+  .drink-sidebar {
+    height: 240px;
+  }
+
+  .leaderboard-sidebar {
+    height: 280px;
+  }
+
+  .sidebar-scroll-window {
+    min-height: 160px;
+  }
+
+  .slot-machine-container {
+    transform: none;
+    width: min(760px, 100%);
+    justify-content: center;
+  }
+
+  .machine-body {
+    width: min(100%, 420px);
+  }
+
+  .pixel-btn,
+  .pixel-mini-btn {
+    min-height: 44px;
+  }
+}
+
 @media (max-width: 640px) {
   body {
     overflow-y: auto;
     height: auto;
-    min-height: 100vh;
-    padding: 12px 10px 16px;
+    min-height: 100dvh;
+    align-items: flex-start;
+    padding: 12px 10px calc(16px + env(safe-area-inset-bottom));
   }
 
   .app-layout {
@@ -1054,5 +1118,10 @@ header p {
 
   .history-user-name {
     font-size: 1.15rem;
+  }
+
+  .pixel-btn,
+  .pixel-mini-btn {
+    min-height: 44px;
   }
 }
